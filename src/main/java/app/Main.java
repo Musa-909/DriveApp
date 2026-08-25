@@ -1,8 +1,11 @@
 package app;
 
-public class Main {
+import app.config.HibernateConfig;
+import jakarta.persistence.EntityManagerFactory;
 
+public class Main {
     public static void main(String[] args) {
-        System.out.println("Driving School backend started.");
+        EntityManagerFactory emf = HibernateConfig.getEntityManagerFactory();
+        System.out.println("Database connected!");
     }
 }
