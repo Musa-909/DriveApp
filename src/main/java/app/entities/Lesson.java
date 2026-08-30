@@ -38,8 +38,9 @@ public class Lesson {
     @OneToMany(mappedBy = "lesson")
     private List<Booking> bookings;
 
-    public Lesson(LocalDateTime lessonTime, int durationMinutes) {
+    public Lesson(LocalDateTime lessonTime, int durationMinutes, LessonType lessonType) {
         this.lessonTime = lessonTime;
         this.durationMinutes = durationMinutes;
+        this.lessonType = lessonType;
     }
 }
