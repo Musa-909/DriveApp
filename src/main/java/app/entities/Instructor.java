@@ -13,10 +13,8 @@ import java.util.List;
 @NoArgsConstructor
 @ToString
 @Entity
-@Table(name = "students")
-
-
-public class Student {
+@Table(name = "instructors")
+public class Instructor {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -31,14 +29,13 @@ public class Student {
     @Column
     private String phoneNumber;
 
-    @ManyToOne
-    @JoinColumn(name = "instructor_id")
-    private Instructor instructor;
+    @OneToMany(mappedBy = "instructor")
+    private List<Student> students;
 
-    @OneToMany(mappedBy = "student")
-    private List<Booking> bookings;
+    @OneToMany(mappedBy = "instructor")
+    private List<Lesson> lessons;
 
-    public Student(String name, String email, String phoneNumber) {
+    public Instructor(String name, String email, String phoneNumber) {
         this.name = name;
         this.email = email;
         this.phoneNumber = phoneNumber;

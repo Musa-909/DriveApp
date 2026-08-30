@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Getter
@@ -13,34 +14,32 @@ import java.util.List;
 @NoArgsConstructor
 @ToString
 @Entity
-@Table(name = "students")
-
-
-public class Student {
+@Table(name = "lessons")
+public class Lesson {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
     @Column
-    private String name;
+    private LocalDateTime lessonTime;
 
     @Column
-    private String email;
+    private int durationMinutes;
 
+    @Enumerated(EnumType.STRING)
     @Column
-    private String phoneNumber;
+    private LessonType lessonType;
 
     @ManyToOne
     @JoinColumn(name = "instructor_id")
     private Instructor instructor;
 
-    @OneToMany(mappedBy = "student")
+    @OneToMany(mappedBy = "lesson")
     private List<Booking> bookings;
 
-    public Student(String name, String email, String phoneNumber) {
-        this.name = name;
-        this.email = email;
-        this.phoneNumber = phoneNumber;
+    public Lesson(LocalDateTime lessonTime, int durationMinutes) {
+        this.lessonTime = lessonTime;
+        this.durationMinutes = durationMinutes;
     }
 }
