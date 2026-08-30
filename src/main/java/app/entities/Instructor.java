@@ -6,6 +6,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
+import java.util.List;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -26,6 +28,12 @@ public class Instructor {
 
     @Column
     private String phoneNumber;
+
+    @OneToMany(mappedBy = "instructor")
+    private List<Student> students;
+
+    @OneToMany(mappedBy = "instructor")
+    private List<Lesson> lessons;
 
     public Instructor(String name, String email, String phoneNumber) {
         this.name = name;

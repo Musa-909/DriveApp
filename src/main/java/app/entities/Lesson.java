@@ -7,6 +7,7 @@ import lombok.Setter;
 import lombok.ToString;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @Setter
@@ -29,6 +30,13 @@ public class Lesson {
     @Enumerated(EnumType.STRING)
     @Column
     private LessonType lessonType;
+
+    @ManyToOne
+    @JoinColumn(name = "instructor_id")
+    private Instructor instructor;
+
+    @OneToMany(mappedBy = "lesson")
+    private List<Booking> bookings;
 
     public Lesson(LocalDateTime lessonTime, int durationMinutes) {
         this.lessonTime = lessonTime;

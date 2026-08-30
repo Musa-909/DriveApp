@@ -23,6 +23,14 @@ public class Booking {
     @Column
     private LocalDateTime bookingTime;
 
+    @ManyToOne
+    @JoinColumn(name = "student_id")
+    private Student student;
+
+    @ManyToOne
+    @JoinColumn(name = "lesson_id")
+    private Lesson lesson;
+
     public Booking(LocalDateTime bookingTime) {
         this.bookingTime = bookingTime;
     }
