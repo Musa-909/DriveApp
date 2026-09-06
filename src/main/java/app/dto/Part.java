@@ -1,4 +1,7 @@
 package app.dto;
 
-public class Part {
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+public record Part(String text) {
 }
