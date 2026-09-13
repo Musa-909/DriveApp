@@ -50,4 +50,17 @@ public class BookingDAOImpl implements BookingDAO {
             em.getTransaction().commit();
         }
     }
+
+    @Override
+    public boolean existsByLessonId(int lessonId) {
+        try (EntityManager em = emf.createEntityManager()) {
+
+            Long count = em.createQuery(
+                            "SELECT COUNT(b) FROM Booking b WHERE b.lesson.id = :lessonId", Long.class)
+                    .setParameter("lessonId", lessonId)
+                    .getSingleResult();
+
+            return count > 0;
+        }
+    }
 }

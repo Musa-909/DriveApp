@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class BookingDaoTest {
+public class BookingDAOTest {
 
     private BookingDAO bookingDAO = new BookingDAOImpl();
 

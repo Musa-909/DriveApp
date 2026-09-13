@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class InstructorDAOTes {
+public class InstructorDAOTest {
 
     private InstructorDAO instructorDAO = new InstructorDAOImpl();
 
