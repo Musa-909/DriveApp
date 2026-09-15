@@ -11,4 +11,6 @@ public interface BookingDAO {
     Booking update(Booking booking);
 
     void delete(int id);
+
+    boolean existsByLessonId(int lessonId);
 }

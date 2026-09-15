@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class LessonDaoTest {
+public class LessonDAOTest {
 
     private LessonDAO lessonDAO = new LessonDAOImpl();
 
