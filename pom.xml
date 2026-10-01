@@ -23,6 +23,7 @@
         <org.slf4j>2.0.17</org.slf4j>
         <hamcrest>3.0</hamcrest>
         <jackson.version>2.20.1</jackson.version>
+        <javalin.version>6.7.0</javalin.version>
     </properties>
 
     <dependencies>
@@ -59,6 +60,13 @@
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
             <version>${jackson.version}</version>
+        </dependency>
+
+        <!-- REST API -->
+        <dependency>
+            <groupId>io.javalin</groupId>
+            <artifactId>javalin</artifactId>
+            <version>${javalin.version}</version>
         </dependency>
 
         <!-- Testing -->

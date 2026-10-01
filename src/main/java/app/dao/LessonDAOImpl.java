@@ -5,6 +5,8 @@ import app.entities.Lesson;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 
+import java.util.List;
+
 public class LessonDAOImpl implements LessonDAO {
 
     private EntityManagerFactory emf = HibernateConfig.getEntityManagerFactory();
@@ -23,6 +25,13 @@ public class LessonDAOImpl implements LessonDAO {
     public Lesson getById(int id) {
         try (EntityManager em = emf.createEntityManager()) {
             return em.find(Lesson.class, id);
+        }
+    }
+
+    @Override
+    public List<Lesson> getAll() {
+        try (EntityManager em = emf.createEntityManager()) {
+            return em.createQuery("SELECT l FROM Lesson l", Lesson.class).getResultList();
         }
     }
 
