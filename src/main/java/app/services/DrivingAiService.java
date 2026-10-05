@@ -10,18 +10,22 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 public class DrivingAiService {
 
     private static final String API_KEY = System.getenv("GEMINI_API_KEY");
     private static final String MODEL = "gemini-3.5-flash-lite";
-    private static final String API_URL = "https://generativelanguage.googleapis.com/v1beta/models/" + MODEL + ":generateContent";
+    private static final String API_URL =
+            "https://generativelanguage.googleapis.com/v1beta/models/"
+                    + MODEL
+                    + ":generateContent";
 
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final HttpClient httpClient = HttpClient.newHttpClient();
 
-    public String askDrivingAssistant(String question)
-            throws IOException, InterruptedException {
+    public CompletableFuture<String> askDrivingAssistant(String question)
+            throws IOException {
 
         if (API_KEY == null || API_KEY.isBlank()) {
             throw new IllegalStateException("GEMINI API KEY is not found");
@@ -62,20 +66,32 @@ public class DrivingAiService {
                 .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
                 .build();
 
-        HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+        return httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofString()).thenApply(response -> {
 
-        if (response.statusCode() != 200) {
-            throw new RuntimeException("Gemini API error, HTTP status: " + response.statusCode());
-        }
+                    if (response.statusCode() != 200) {
+                        throw new RuntimeException(
+                                "Gemini API error, HTTP status: "
+                                        + response.statusCode()
+                        );
+                    }
 
-        GeminiResponse geminiResponse = objectMapper.readValue(response.body(), GeminiResponse.class);
+                    try {GeminiResponse geminiResponse = objectMapper.readValue(response.body(), GeminiResponse.class
+                                );
 
-        return geminiResponse
-                .candidates()
-                .get(0)
-                .content()
-                .parts()
-                .get(0)
-                .text();
+                        return geminiResponse
+                                .candidates()
+                                .get(0)
+                                .content()
+                                .parts()
+                                .get(0)
+                                .text();
+
+                    } catch (IOException e) {
+                        throw new RuntimeException(
+                                "Could not parse Gemini response",
+                                e
+                        );
+                    }
+                });
     }
 }

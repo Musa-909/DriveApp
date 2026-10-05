@@ -16,19 +16,20 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import app.services.DrivingAiService;
 
-import java.util.concurrent.ExecutorService;
+
 
 public class Main {
 
     public static void main(String[] args) throws Exception {
 
-     /*   DrivingAiService aiService = new DrivingAiService();
+        DrivingAiService aiService = new DrivingAiService();
 
-        String answer = aiService.askDrivingAssistant(
+        aiService.askDrivingAssistant(
                 "What does ABS mean in a car?"
-        );
-        System.out.println(answer);
-      */
+        ).thenAccept(answer -> {
+            System.out.println(answer);
+        });
+
 
         BookingDAO bookingDAO = new BookingDAOImpl();
         StudentDAO studentDAO = new StudentDAOImpl();
@@ -45,7 +46,12 @@ public class Main {
         System.out.println("Student 2 exists: " + (student2 != null));
         System.out.println("Lesson exists: " + (lesson != null));
 
+
+
+
         ExecutorService executor = Executors.newFixedThreadPool(2);
+
+
 
         executor.submit(() -> {
             try {Booking booking = new Booking(LocalDateTime.now());
@@ -55,7 +61,7 @@ public class Main {
 
                 bookingService.bookLesson(booking);
 
-                System.out.println("Student 1 bookedf the lesson");
+                System.out.println("Student 1 booked the lesson");
 
             } catch (Exception e) {
                 System.out.println("Student 1 could not book the lesson: " + e.getMessage());
@@ -77,5 +83,6 @@ public class Main {
         });
 
         executor.shutdown();
+        bookingService.shutdown();
     }
 }
