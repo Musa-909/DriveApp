@@ -69,6 +69,14 @@
             <version>${javalin.version}</version>
         </dependency>
 
+        <!-- Rest assuredd -->
+        <dependency>
+            <groupId>io.rest-assured</groupId>
+            <artifactId>rest-assured</artifactId>
+            <version>5.5.6</version>
+            <scope>test</scope>
+        </dependency>
+
         <!-- Testing -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>
