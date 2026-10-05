@@ -22,6 +22,8 @@ public class Main {
 
     public static void main(String[] args) throws Exception {
 
+
+        /*
         DrivingAiService aiService = new DrivingAiService();
 
         aiService.askDrivingAssistant(
@@ -29,7 +31,7 @@ public class Main {
         ).thenAccept(answer -> {
             System.out.println(answer);
         });
-
+*/
 
         BookingDAO bookingDAO = new BookingDAOImpl();
         StudentDAO studentDAO = new StudentDAOImpl();
