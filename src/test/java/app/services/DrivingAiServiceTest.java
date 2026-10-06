@@ -10,13 +10,13 @@ class DrivingAiServiceTest {
 
     @Test
     void askDrivingAssistantShouldReturnDanishAnswer()
-            throws IOException, InterruptedException {
+            throws IOException {
 
         DrivingAiService aiService = new DrivingAiService();
 
         String answer = aiService.askDrivingAssistant(
                 "Hvad betyder ABS i en bil?"
-        );
+        ).join();
 
         assertNotNull(answer);
         assertFalse(answer.isBlank());
@@ -26,13 +26,13 @@ class DrivingAiServiceTest {
 
     @Test
     void askDrivingAssistantShouldReturnEnglishAnswer()
-            throws IOException, InterruptedException {
+            throws IOException {
 
         DrivingAiService aiService = new DrivingAiService();
 
         String answer = aiService.askDrivingAssistant(
                 "What does ABS mean in a car?"
-        );
+        ).join();
 
         assertNotNull(answer);
         assertFalse(answer.isBlank());
@@ -42,13 +42,13 @@ class DrivingAiServiceTest {
 
     @Test
     void askDrivingAssistantShouldRejectUnrelatedQuestion()
-            throws IOException, InterruptedException {
+            throws IOException {
 
         DrivingAiService aiService = new DrivingAiService();
 
         String answer = aiService.askDrivingAssistant(
                 "Who won the Champions League in 2025?"
-        );
+        ).join();
 
         assertNotNull(answer);
         assertFalse(answer.isBlank());
