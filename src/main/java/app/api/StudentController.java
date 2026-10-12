@@ -6,7 +6,9 @@ import app.dto.StudentResponseDTO;
 import app.entities.Student;
 import io.javalin.http.Context;
 import lombok.RequiredArgsConstructor;
-
+import org.mindrot.jbcrypt.BCrypt;
+import app.dto.LoginRequestDTO;
+import org.mindrot.jbcrypt.BCrypt;
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -42,11 +44,18 @@ public class StudentController {
     public void create(Context ctx) {
         StudentRequestDTO request = getValidatedRequest(ctx);
 
+        String hashedPassword = BCrypt.hashpw(
+                request.password(),
+                BCrypt.gensalt()
+        );
+
         Student student = new Student(
                 request.name(),
                 request.email(),
                 request.phoneNumber()
         );
+
+        student.setPassword(hashedPassword);
 
         Student savedStudent = studentDAO.create(student);
 
@@ -112,4 +121,26 @@ public class StudentController {
                 student.getPhoneNumber()
         );
     }
+
+
+    public void login(Context ctx) {
+
+        LoginRequestDTO request = ctx.bodyAsClass(LoginRequestDTO.class);
+
+        Student student = studentDAO.getByEmail(request.email());
+
+        if (student == null || student.getPassword() == null ||
+                request.password() == null ||
+                !BCrypt.checkpw(request.password(), student.getPassword())) {
+
+            ctx.status(401);
+            ctx.json(new ErrorResponse(401, "Forkert email eller password"));
+            return;
+        }
+
+        ctx.status(200);
+        ctx.json(toResponse(student));
+    }
+
+
 }

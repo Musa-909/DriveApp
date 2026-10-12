@@ -15,5 +15,6 @@ public class StudentRoutes {
         app.post("/api/students", controller::create);
         app.put("/api/students/{id}", controller::update);
         app.delete("/api/students/{id}", controller::delete);
+        app.post("/api/students/login", controller::login);
     }
 }

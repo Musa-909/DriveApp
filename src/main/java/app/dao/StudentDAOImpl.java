@@ -66,4 +66,25 @@ public class StudentDAOImpl implements StudentDAO {
         em.getTransaction().commit();
         em.close();
     }
+
+
+    @Override
+    public Student getByEmail(String email) {
+        EntityManager em = emf.createEntityManager();
+
+        try {
+            return em.createQuery(
+                            "SELECT s FROM Student s WHERE s.email = :email",
+                            Student.class
+                    )
+                    .setParameter("email", email)
+                    .getResultStream()
+                    .findFirst()
+                    .orElse(null);
+
+        } finally {
+            em.close();
+        }
+    }
+
 }

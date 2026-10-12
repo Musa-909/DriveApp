@@ -152,6 +152,13 @@
             <version>${org.slf4j}</version>
         </dependency>
 
+        <!-- Password hashing med BCrypt -->
+        <dependency>
+            <groupId>org.mindrot</groupId>
+            <artifactId>jbcrypt</artifactId>
+            <version>0.4</version>
+        </dependency>
+
     </dependencies>
 
 </project>
