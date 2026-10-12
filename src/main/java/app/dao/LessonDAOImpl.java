@@ -31,7 +31,8 @@ public class LessonDAOImpl implements LessonDAO {
     @Override
     public List<Lesson> getAll() {
         try (EntityManager em = emf.createEntityManager()) {
-            return em.createQuery("SELECT l FROM Lesson l", Lesson.class).getResultList();
+            return em.createQuery("SELECT l FROM Lesson l LEFT JOIN FETCH l.instructor", Lesson.class)
+                    .getResultList();
         }
     }
 

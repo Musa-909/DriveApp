@@ -8,6 +8,7 @@ import app.dao.BookingDAOImpl;
 import app.dao.InstructorDAOImpl;
 import app.dao.LessonDAOImpl;
 import app.dao.StudentDAOImpl;
+import app.entities.Lesson;
 import io.javalin.Javalin;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -73,6 +74,8 @@ public class Application {
         instructorRoutes.register(app);
         lessonRoutes.register(app);
         bookingRoutes.register(app);
+
+
 
         app.start(7070);
     }
