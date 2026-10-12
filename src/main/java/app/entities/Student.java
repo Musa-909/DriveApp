@@ -17,7 +17,6 @@ import java.util.List;
 
 
 public class Student {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
@@ -30,6 +29,9 @@ public class Student {
 
     @Column
     private String phoneNumber;
+
+    @Column(nullable = true)
+    private String password;
 
     @ManyToOne
     @JoinColumn(name = "instructor_id")

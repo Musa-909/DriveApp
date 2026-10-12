@@ -7,6 +7,11 @@ import org.junit.jupiter.api.Test;
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
+import org.mindrot.jbcrypt.BCrypt;
+import app.dao.StudentDAOImpl;
+import app.entities.Student;
+import static io.restassured.RestAssured.given;
+import static org.junit.jupiter.api.Assertions.*;
 
 class StudentApiTest {
 
@@ -362,6 +367,81 @@ class StudentApiTest {
                 .then()
                 .statusCode(204);
     }
+
+
+    @Test
+    void createStudentWithHashePasswordTest() {
+
+        String json = """
+            {
+                "name": "BCrypt Test",
+                "email": "bcrypt@student.dk",
+                "phoneNumber": "12345678",
+                "password": "Test1234"
+            }
+            """;
+
+        int studentId = given()
+                .contentType("application/json")
+                .body(json)
+                .when()
+                .post("/api/students")
+                .then()
+                .statusCode(201)
+                .body("password", org.hamcrest.Matchers.nullValue())
+                .extract()
+                .path("id");
+
+        StudentDAOImpl studentDAO = new StudentDAOImpl();
+        Student student = studentDAO.getById(studentId);
+
+        assertNotNull(student);
+        assertNotNull(student.getPassword());
+        assertNotEquals("Test1234", student.getPassword());
+        assertTrue(BCrypt.checkpw("Test1234", student.getPassword()));
+    }
+
+
+
+    @Test
+    void loginStudentTest() {
+
+        String json = """
+            {
+                "email": "bcrypt@student.dk",
+                "password": "Test1234"
+            }
+            """;
+
+        given()
+                .contentType("application/json")
+                .body(json)
+                .when()
+                .post("/api/students/login")
+                .then()
+                .statusCode(200)
+                .body("email", equalTo("bcrypt@student.dk"));
+    }
+
+    @Test
+    void loginWithWrongPasswordTest() {
+
+        String json = """
+            {
+                "email": "bcrypt@student.dk",
+                "password": "ForkertPassword123"
+            }
+            """;
+
+        given()
+                .contentType("application/json")
+                .body(json)
+                .when()
+                .post("/api/students/login")
+                .then()
+                .statusCode(401);
+    }
+
 
 
 }
