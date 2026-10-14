@@ -6,6 +6,7 @@
 http://localhost:7070
 ```
 
+
 ## Endpoints
 
 | Method | URL | Request Body | Success Response | Errors |
@@ -14,6 +15,7 @@ http://localhost:7070
 | GET | `/api/students` | None | `200 OK` | `500 Internal Server Error` |
 | GET | `/api/students/{id}` | None | `200 OK` | `400 Bad Request`, `404 Not Found` |
 | POST | `/api/students` | Student request | `201 Created` | `400 Bad Request`, `500 Internal Server Error` |
+| POST | `/api/students/login` | Login request | `200 OK` | `401 Unauthorized` |
 | PUT | `/api/students/{id}` | Student request | `200 OK` | `400 Bad Request`, `404 Not Found` |
 | DELETE | `/api/students/{id}` | None | `204 No Content` | `400 Bad Request`, `404 Not Found` |
 | GET | `/api/instructors` | None | `200 OK` | `500 Internal Server Error` |
@@ -28,13 +30,14 @@ http://localhost:7070
 | DELETE | `/api/lessons/{id}` | None | `204 No Content` | `400 Bad Request`, `404 Not Found` |
 | GET | `/api/bookings` | None | `200 OK` | `500 Internal Server Error` |
 | GET | `/api/bookings/{id}` | None | `200 OK` | `400 Bad Request`, `404 Not Found` |
-| POST | `/api/bookings` | Booking request | `201 Created` | `400 Bad Request`, `404 Not Found`, `500 Internal Server Error` |
+| POST | `/api/bookings` | Booking request + JWT | `201 Created` | `400 Bad Request`, `401 Unauthorized`, `404 Not Found`, `500 Internal Server Error` |
 | PUT | `/api/bookings/{id}` | Booking request | `200 OK` | `400 Bad Request`, `404 Not Found` |
 | DELETE | `/api/bookings/{id}` | None | `204 No Content` | `400 Bad Request`, `404 Not Found` |
 
 ---
 
 # Health Check
+
 
 Checks whether the REST API is running.
 
@@ -142,9 +145,12 @@ Returned if no student exists with the given ID.
 
 ---
 
+
 ## Create Student
 
 Creates and stores a new student.
+
+Student passwords are hashed using BCrypt before being stored in the database.
 
 ### Request
 
@@ -158,7 +164,8 @@ POST /api/students
 {
   "name": "Musa Sayed",
   "email": "musa@example.com",
-  "phoneNumber": "12345678"
+  "phoneNumber": "12345678",
+  "password": "Test1234"
 }
 ```
 
@@ -188,6 +195,7 @@ Invalid input returns:
 ```
 
 ---
+
 
 ## Update Student
 
@@ -1141,6 +1149,86 @@ Returned if the booking does not exist.
 
 ---
 
+# JWT Authentication
+
+JWT authentication is used to protect booking creation in DriveApp.
+
+## Student Login
+
+Students can log in using their email and password.
+
+Passwords are securely hashed using BCrypt.
+
+### Request
+
+```text
+POST /api/students/login
+```
+
+**Content-Type: application/json**
+
+```json
+{
+  "email": "student@example.com",
+  "password": "Test1234"
+}
+```
+
+### Response
+
+**200 OK**
+
+```json
+{
+  "message": "Login successful",
+  "token": "eyJhbGciOiJIUzI1NiJ9..."
+}
+```
+
+### Errors
+
+**401 Unauthorized**
+
+Returned if the email or password is incorrect.
+
+---
+
+## Protected Booking
+
+Creating a booking requires a valid JWT.
+
+### Request
+
+```text
+POST /api/bookings
+```
+
+**Authorization: Bearer &lt;token&gt;**
+
+### Response
+
+**201 Created**
+
+The booking is created if the JWT is valid and the lesson is available.
+
+### Errors
+
+**401 Unauthorized**
+
+Returned if the JWT is missing, invalid or expired.
+
+---
+
+## Security Implementation
+
+- BCrypt is used to hash and verify student passwords.
+- `JWTToken.java` generates and validates JWTs.
+- `Filter.java` checks JWTs before booking creation.
+- `JWT_SECRET` is stored as an environment variable.
+- Authentication is tested using JUnit and REST Assured.
+
+---
+
 # Error Response Format
 
 Errors are returned as JSON with a status code and message.
@@ -1173,5 +1261,6 @@ An unexpected server-side error returns:
 | `201 Created` | A new resource was created successfully |
 | `204 No Content` | A resource was deleted successfully |
 | `400 Bad Request` | Request data or a path parameter was invalid |
+| `401 Unauthorized` | Authentication is missing or invalid |
 | `404 Not Found` | Requested resource could not be found |
 | `500 Internal Server Error` | An unexpected server-side error occurred |

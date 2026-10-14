@@ -4,8 +4,10 @@ import app.entities.Lesson;
 import app.entities.LessonType;
 import org.junit.jupiter.api.Test;
 
+
 import java.time.LocalDateTime;
 
+import static io.restassured.RestAssured.given;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class LessonDAOTest {
@@ -27,4 +29,8 @@ public class LessonDAOTest {
 
         lessonDAO.delete(lesson.getId());
     }
+
+
+
+
 }
