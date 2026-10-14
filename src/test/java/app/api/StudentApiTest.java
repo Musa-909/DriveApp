@@ -443,5 +443,26 @@ class StudentApiTest {
     }
 
 
+    @Test
+    void loginStudentJWTTest() {
+
+        String json = """
+            {
+                "email": "bcrypt@student.dk",
+                "password": "Test1234"
+            }
+            """;
+
+        given()
+                .contentType("application/json")
+                .body(json)
+                .when()
+                .post("/api/students/login")
+                .then()
+                .statusCode(200)
+                .body("message", equalTo("Login successful"))
+                .body("token", notNullValue());
+    }
+
 
 }

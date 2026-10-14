@@ -10,6 +10,9 @@ import org.mindrot.jbcrypt.BCrypt;
 import app.dto.LoginRequestDTO;
 import org.mindrot.jbcrypt.BCrypt;
 import java.util.List;
+import java.util.Map;
+
+import app.security.JWTToken;
 
 @RequiredArgsConstructor
 public class StudentController {
@@ -138,8 +141,11 @@ public class StudentController {
             return;
         }
 
+        String token = JWTToken.generateToken(student.getId());
+
         ctx.status(200);
-        ctx.json(toResponse(student));
+        ctx.json(Map.of("message", "Login successful", "token", token
+        ));
     }
 
 

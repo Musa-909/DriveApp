@@ -14,12 +14,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Map;
+import app.security.Filter;
 
 public class Application {
 
     private static final Logger logger = LoggerFactory.getLogger(Application.class);
 
     public static void main(String[] args) {
+
+        System.out.println("JWT_SECRET fundet: " +
+                (System.getenv("JWT_SECRET") != null));
 
         StudentDAOImpl studentDAO = new StudentDAOImpl();
         InstructorDAOImpl instructorDAO = new InstructorDAOImpl();
@@ -37,6 +41,13 @@ public class Application {
         BookingRoutes bookingRoutes = new BookingRoutes(bookingController);
 
         Javalin app = Javalin.create();
+
+        Filter filter = new Filter();
+
+        app.before("/api/bookings", ctx -> {
+            if (ctx.method() == io.javalin.http.HandlerType.POST)
+            {filter.authenticate(ctx);}
+        });
 
         app.exception(Exception.class, (exception, ctx) -> {
             logger.error(
