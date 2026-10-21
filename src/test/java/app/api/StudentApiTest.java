@@ -1,3 +1,4 @@
+
 package app.api;
 
 import io.restassured.RestAssured;
@@ -10,8 +11,8 @@ import static org.hamcrest.Matchers.notNullValue;
 import org.mindrot.jbcrypt.BCrypt;
 import app.dao.StudentDAOImpl;
 import app.entities.Student;
-import static io.restassured.RestAssured.given;
 import static org.junit.jupiter.api.Assertions.*;
+import java.util.UUID;
 
 class StudentApiTest {
 
@@ -20,7 +21,6 @@ class StudentApiTest {
         RestAssured.baseURI = "http://localhost";
         RestAssured.port = 7070;
     }
-
 
     //Students CRUD test functions
     @Test
@@ -53,7 +53,8 @@ class StudentApiTest {
                 {
                     "name": "Test Student",
                     "email": "test@student.dk",
-                    "phoneNumber": "12345678"
+                    "phoneNumber": "12345678",
+                    "password": "Test1234"
                 }
                 """;
 
@@ -69,18 +70,20 @@ class StudentApiTest {
 
     @Test
     void getStudentByIdTest() {
+        int id = createTestStudent();
 
         given()
-                .pathParam("id", 1)
+                .pathParam("id", id)
                 .when()
                 .get("/api/students/{id}")
                 .then()
                 .statusCode(200)
-                .body("id", equalTo(1));
+                .body("id", equalTo(id));
     }
 
     @Test
     void updateStudentTest() {
+        int id = createTestStudent();
 
         String json = """
                 {
@@ -93,7 +96,7 @@ class StudentApiTest {
         given()
                 .contentType("application/json")
                 .body(json)
-                .pathParam("id", 1)
+                .pathParam("id", id)
                 .when()
                 .put("/api/students/{id}")
                 .then()
@@ -104,9 +107,10 @@ class StudentApiTest {
 
     @Test
     void deleteStudentTest() {
+        int id = createTestStudent();
 
         given()
-                .pathParam("id", 1)
+                .pathParam("id", id)
                 .when()
                 .delete("/api/students/{id}")
                 .then()
@@ -161,29 +165,33 @@ class StudentApiTest {
 
     @Test
     void getInstructorByIdTest() {
+        int id = createTestInstructor();
+
         given()
-                .pathParam("id", 3)
+                .pathParam("id", id)
                 .when()
                 .get("/api/instructors/{id}")
                 .then()
                 .statusCode(200)
-                .body("id", equalTo(3));
+                .body("id", equalTo(id));
     }
 
     @Test
     void updateInstructorTest() {
-        String json = """   
-                {   
-                  "name": "Updated Instructor",   
-                  "email": "updated@instructor.dk",   
-                  "phoneNumber": "88888888"   
-                }   
+        int id = createTestInstructor();
+
+        String json = """
+                {
+                  "name": "Updated Instructor",
+                  "email": "updated@instructor.dk",
+                  "phoneNumber": "88888888"
+                }
                 """;
 
         given()
                 .contentType("application/json")
                 .body(json)
-                .pathParam("id", 3)
+                .pathParam("id", id)
                 .when()
                 .put("/api/instructors/{id}")
                 .then()
@@ -194,13 +202,15 @@ class StudentApiTest {
 
     @Test
     void deleteInstructorTest() {
+        int id = createTestInstructor();
+
         given()
-                .pathParam("id", 3)
+                .pathParam("id", id)
                 .when()
                 .get("/api/instructors/{id}")
                 .then()
                 .statusCode(200)
-                .body("id", equalTo(3));
+                .body("id", equalTo(id));
     }
 
 
@@ -218,15 +228,16 @@ class StudentApiTest {
 
     @Test
     void createLessonTest() {
+        int instructorId = createTestInstructor();
 
-        String json = """  
-                {  
-                  "lessonTime": "2026-10-10T12:00:00",  
-                  "durationMinutes": 45,  
-                  "lessonType": "PRACTICAL",  
-                  "instructorId": 3  
-                }  
-                """;
+        String json = """
+                {
+                  "lessonTime": "2026-10-10T12:00:00",
+                  "durationMinutes": 45,
+                  "lessonType": "PRACTICAL",
+                  "instructorId": %d
+                }
+                """.formatted(instructorId);
 
         given()
                 .contentType("application/json")
@@ -241,31 +252,35 @@ class StudentApiTest {
 
     @Test
     void getLessonByIdTest() {
+        int id = createTestLesson();
+
         given()
-                .pathParam("id", 3)
+                .pathParam("id", id)
                 .when()
                 .get("/api/lessons/{id}")
                 .then()
                 .statusCode(200)
-                .body("id", equalTo(3));
+                .body("id", equalTo(id));
     }
 
     @Test
     void updateLessonTest() {
+        int id = createTestLesson();
+        int instructorId = createTestInstructor();
 
-        String json = """  
-                {  
-                  "lessonTime": "2026-10-10T14:00:00",  
-                  "durationMinutes": 60,  
-                  "lessonType": "THEORY",  
-                  "instructorId": 3  
-                }  
-                """;
+        String json = """
+                {
+                  "lessonTime": "2026-10-10T14:00:00",
+                  "durationMinutes": 60,
+                  "lessonType": "THEORY",
+                  "instructorId": %d
+                }
+                """.formatted(instructorId);
 
         given()
                 .contentType("application/json")
                 .body(json)
-                .pathParam("id", 3)
+                .pathParam("id", id)
                 .when()
                 .put("/api/lessons/{id}")
                 .then()
@@ -276,8 +291,10 @@ class StudentApiTest {
 
     @Test
     void deleteLessonTest() {
+        int id = createTestLesson();
+
         given()
-                .pathParam("id", 3)
+                .pathParam("id", id)
                 .when()
                 .delete("/api/lessons/{id}")
                 .then()
@@ -287,7 +304,6 @@ class StudentApiTest {
 
 
 
-    
     // Booking CRUD test functions
 
     @Test
@@ -302,66 +318,77 @@ class StudentApiTest {
 
     @Test
     void createBookingTest() {
+        int studentId = createTestStudent();
+        int lessonId = createTestLesson();
+        String token = loginTestStudent(studentId);
 
         String json = """
                 {
                   "bookingTime": "2026-10-06T19:30:00",
-                  "studentId": 2,
-                  "lessonId": 4
+                  "studentId": %d,
+                  "lessonId": %d
                 }
-                """;
+                """.formatted(studentId, lessonId);
 
         given()
                 .contentType("application/json")
+                .header("Authorization", "Bearer " + token)
                 .body(json)
                 .when()
                 .post("/api/bookings")
                 .then()
                 .log().all()
                 .statusCode(201)
-                .body("studentId", equalTo(2))
-                .body("lessonId", equalTo(4));
+                .body("studentId", equalTo(studentId))
+                .body("lessonId", equalTo(lessonId));
     }
 
     @Test
     void getBookingByIdTest() {
+        int id = createTestBooking();
+
         given()
-                .pathParam("id", 2)
+                .pathParam("id", id)
                 .when()
                 .get("/api/bookings/{id}")
                 .then()
                 .statusCode(200)
-                .body("id", equalTo(2));
+                .body("id", equalTo(id));
     }
 
     @Test
     void updateBookingTest() {
+        int id = createTestBooking();
+        int studentId = createTestStudent();
+        int lessonId = createTestLesson();
 
         String json = """
                 {
                   "bookingTime": "2026-10-07T10:00:00",
-                  "studentId": 2,
-                  "lessonId": 4
+                  "studentId": %d,
+                  "lessonId": %d
                 }
-                """;
+                """.formatted(studentId, lessonId);
 
         given()
                 .contentType("application/json")
                 .body(json)
-                .pathParam("id", 2)
+                .pathParam("id", id)
                 .when()
                 .put("/api/bookings/{id}")
                 .then()
                 .log().all()
                 .statusCode(200)
-                .body("studentId", equalTo(2))
-                .body("lessonId", equalTo(4));
+                .body("studentId", equalTo(studentId))
+                .body("lessonId", equalTo(lessonId));
     }
 
     @Test
     void deleteBookingTest() {
+        int id = createTestBooking();
+
         given()
-                .pathParam("id", 2)
+                .pathParam("id", id)
                 .when()
                 .delete("/api/bookings/{id}")
                 .then()
@@ -405,13 +432,15 @@ class StudentApiTest {
 
     @Test
     void loginStudentTest() {
+        String email = "bcrypt-" + UUID.randomUUID() + "@student.dk";
+        createTestStudent(email);
 
         String json = """
-            {
-                "email": "bcrypt@student.dk",
-                "password": "Test1234"
-            }
-            """;
+                {
+                    "email": "%s",
+                    "password": "Test1234"
+                }
+                """.formatted(email);
 
         given()
                 .contentType("application/json")
@@ -420,7 +449,8 @@ class StudentApiTest {
                 .post("/api/students/login")
                 .then()
                 .statusCode(200)
-                .body("email", equalTo("bcrypt@student.dk"));
+                .body("message", equalTo("Login successful"))
+                .body("token", notNullValue());
     }
 
     @Test
@@ -445,13 +475,15 @@ class StudentApiTest {
 
     @Test
     void loginStudentJWTTest() {
+        String email = "bcrypt-" + UUID.randomUUID() + "@student.dk";
+        createTestStudent(email);
 
         String json = """
-            {
-                "email": "bcrypt@student.dk",
-                "password": "Test1234"
-            }
-            """;
+                {
+                    "email": "%s",
+                    "password": "Test1234"
+                }
+                """.formatted(email);
 
         given()
                 .contentType("application/json")
@@ -464,5 +496,125 @@ class StudentApiTest {
                 .body("token", notNullValue());
     }
 
+
+
+    private int createTestStudent() {
+        return createTestStudent("student-" + UUID.randomUUID() + "@test.dk");
+    }
+
+    private int createTestStudent(String email) {
+        String json = """
+                {
+                    "name": "Test Student",
+                    "email": "%s",
+                    "phoneNumber": "12345678",
+                    "password": "Test1234"
+                }
+                """.formatted(email);
+
+        return given()
+                .contentType("application/json")
+                .body(json)
+                .when()
+                .post("/api/students")
+                .then()
+                .statusCode(201)
+                .extract()
+                .path("id");
+    }
+
+    private int createTestInstructor() {
+        String json = """
+                {
+                    "name": "Test Instructor",
+                    "email": "instructor-%s@test.dk",
+                    "phoneNumber": "22222222"
+                }
+                """.formatted(UUID.randomUUID());
+
+        return given()
+                .contentType("application/json")
+                .body(json)
+                .when()
+                .post("/api/instructors")
+                .then()
+                .statusCode(201)
+                .extract()
+                .path("id");
+    }
+
+    private int createTestLesson() {
+        int instructorId = createTestInstructor();
+        String json = """
+                {
+                    "lessonTime": "2026-11-25T14:00:00",
+                    "durationMinutes": 45,
+                    "lessonType": "PRACTICAL",
+                    "instructorId": %d
+                }
+                """.formatted(instructorId);
+
+        return given()
+                .contentType("application/json")
+                .body(json)
+                .when()
+                .post("/api/lessons")
+                .then()
+                .statusCode(201)
+                .extract()
+                .path("id");
+    }
+
+    private String loginTestStudent(int studentId) {
+        String email = given()
+                .pathParam("id", studentId)
+                .when()
+                .get("/api/students/{id}")
+                .then()
+                .statusCode(200)
+                .extract()
+                .path("email");
+
+        String json = """
+                {
+                    "email": "%s",
+                    "password": "Test1234"
+                }
+                """.formatted(email);
+
+        return given()
+                .contentType("application/json")
+                .body(json)
+                .when()
+                .post("/api/students/login")
+                .then()
+                .statusCode(200)
+                .extract()
+                .path("token");
+    }
+
+    private int createTestBooking() {
+        int studentId = createTestStudent();
+        int lessonId = createTestLesson();
+        String token = loginTestStudent(studentId);
+        String json = """
+                {
+                    "bookingTime": "2026-11-25T14:00:00",
+                    "studentId": %d,
+                    "lessonId": %d
+                }
+                """.formatted(studentId, lessonId);
+
+        return given()
+                .contentType("application/json")
+                .header("Authorization", "Bearer " + token)
+                .body(json)
+                .when()
+                .post("/api/bookings")
+                .then()
+                .statusCode(201)
+                .extract()
+                .path("id");
+    }
 
 }
