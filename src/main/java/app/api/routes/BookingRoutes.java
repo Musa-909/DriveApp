@@ -3,6 +3,7 @@ package app.api.routes;
 import app.api.BookingController;
 import io.javalin.Javalin;
 import lombok.RequiredArgsConstructor;
+import app.security.JWTToken;
 
 @RequiredArgsConstructor
 public class BookingRoutes {
