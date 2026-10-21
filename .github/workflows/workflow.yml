@@ -11,6 +11,30 @@ jobs:
   build-and-push:
     runs-on: ubuntu-latest
 
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: driveapp_test
+          POSTGRES_USER: testuser
+          POSTGRES_PASSWORD: testpassword
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U testuser -d driveapp_test"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      DEPLOYED: "true"
+      DB_NAME: driveapp_test
+      CONNECTION_STR: jdbc:postgresql://localhost:5432/
+      DB_USERNAME: testuser
+      DB_PASSWORD: testpassword
+      JWT_SECRET: ${{ secrets.JWT_SECRET }}
+      GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -22,8 +46,41 @@ jobs:
           java-version: '17'
           cache: maven
 
-      - name: Build JAR and run tests
-        run: mvn clean verify
+      - name: Build JAR
+        run: mvn clean package -DskipTests
+
+      - name: Start DriveApp API
+        run: |
+          nohup java -jar target/app.jar > driveapp.log 2>&1 &
+          echo $! > driveapp.pid
+
+          for i in {1..30}; do
+            if curl --fail --silent http://localhost:7070/api/health > /dev/null; then
+              echo "DriveApp API is ready"
+              exit 0
+            fi
+            sleep 2
+          done
+
+          cat driveapp.log
+          exit 1
+
+      - name: Run automated tests
+        run: mvn test
+
+      - name: Show API logs on failure
+        if: failure()
+        run: |
+          if [ -f driveapp.log ]; then
+            cat driveapp.log
+          fi
+
+      - name: Stop DriveApp API
+        if: always()
+        run: |
+          if [ -f driveapp.pid ]; then
+            kill "$(cat driveapp.pid)" || true
+          fi
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
