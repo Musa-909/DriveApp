@@ -28,6 +28,16 @@ public class InstructorDAOImpl implements InstructorDAO {
         }
     }
 
+    public Instructor getByEmail(String email) {
+        try (EntityManager em = emf.createEntityManager()) {
+            return em.createQuery("SELECT i FROM Instructor i WHERE i.email = :email", Instructor.class)
+                    .setParameter("email", email)
+                    .getResultStream()
+                    .findFirst()
+                    .orElse(null);
+        }
+    }
+
     @Override
     public Instructor update(Instructor instructor) {
         try (EntityManager em = emf.createEntityManager()) {

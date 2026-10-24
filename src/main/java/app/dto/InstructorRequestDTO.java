@@ -1,5 +1,5 @@
 package app.dto;
 
-public record InstructorRequestDTO(String name, String email, String phoneNumber){
+public record InstructorRequestDTO(String name, String email, String phoneNumber, String password) {
 
 }

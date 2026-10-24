@@ -6,6 +6,8 @@ import app.dto.LessonRequestDTO;
 import app.dto.LessonResponseDTO;
 import app.entities.Instructor;
 import app.entities.Lesson;
+import app.entities.Role;
+import app.security.Filter;
 import io.javalin.http.Context;
 import lombok.RequiredArgsConstructor;
 
@@ -16,8 +18,11 @@ public class LessonController {
 
     private final LessonDAOImpl lessonDAO;
     private final InstructorDAOImpl instructorDAO;
+    private final Filter filter = new Filter();
 
     public void getAll(Context ctx) {
+        filter.authorize(ctx, Role.INSTRUCTOR);
+
         List<LessonResponseDTO> lessons = lessonDAO.getAll()
                 .stream()
                 .map(this::toResponse)
@@ -27,7 +32,19 @@ public class LessonController {
         ctx.json(lessons);
     }
 
+    public void getAvailable(Context ctx) {
+        List<LessonResponseDTO> lessons = lessonDAO.getAvailable()
+                .stream()
+                .map(this::toResponse)
+                .toList();
+
+        ctx.status(200);
+        ctx.json(lessons);
+    }
+
     public void getById(Context ctx) {
+        filter.authorize(ctx, Role.INSTRUCTOR);
+
         int id = getId(ctx);
         Lesson lesson = lessonDAO.getById(id);
 
@@ -42,6 +59,8 @@ public class LessonController {
     }
 
     public void create(Context ctx) {
+        filter.authorize(ctx, Role.INSTRUCTOR);
+
         LessonRequestDTO request = getValidatedRequest(ctx);
 
         Instructor instructor = instructorDAO.getById(request.instructorId());
@@ -67,6 +86,8 @@ public class LessonController {
     }
 
     public void update(Context ctx) {
+        filter.authorize(ctx, Role.INSTRUCTOR);
+
         int id = getId(ctx);
         Lesson lesson = lessonDAO.getById(id);
 
@@ -98,6 +119,8 @@ public class LessonController {
     }
 
     public void delete(Context ctx) {
+        filter.authorize(ctx, Role.INSTRUCTOR);
+
         int id = getId(ctx);
         Lesson lesson = lessonDAO.getById(id);
 

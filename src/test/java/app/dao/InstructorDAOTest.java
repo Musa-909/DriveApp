@@ -22,5 +22,7 @@ public class InstructorDAOTest {
         assertEquals("Test Instructor", foundInstructor.getName());
 
         instructorDAO.delete(instructor.getId());
+
+        assertNull(instructorDAO.getById(instructor.getId()));
     }
 }

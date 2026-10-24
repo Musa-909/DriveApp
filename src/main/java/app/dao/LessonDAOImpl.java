@@ -36,6 +36,15 @@ public class LessonDAOImpl implements LessonDAO {
         }
     }
 
+    public List<Lesson> getAvailable() {
+        try (EntityManager em = emf.createEntityManager()) {
+            return em.createQuery(
+                    "SELECT l FROM Lesson l LEFT JOIN FETCH l.instructor WHERE l.id NOT IN (SELECT b.lesson.id FROM Booking b)",
+                    Lesson.class
+            ).getResultList();
+        }
+    }
+
     @Override
     public Lesson update(Lesson lesson) {
         try (EntityManager em = emf.createEntityManager()) {

@@ -11,6 +11,7 @@ public class LessonRoutes {
 
     public void register(Javalin app) {
         app.get("/api/lessons", controller::getAll);
+        app.get("/api/lessons/available", controller::getAvailable);
         app.get("/api/lessons/{id}", controller::getById);
         app.post("/api/lessons", controller::create);
         app.put("/api/lessons/{id}", controller::update);

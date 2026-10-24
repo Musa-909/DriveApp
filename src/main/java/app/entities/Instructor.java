@@ -29,6 +29,14 @@ public class Instructor {
     @Column
     private String phoneNumber;
 
+    @ToString.Exclude
+    @Column
+    private String password;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "role")
+    private Role role = Role.INSTRUCTOR;
+
     @OneToMany(mappedBy = "instructor")
     private List<Student> students;
 

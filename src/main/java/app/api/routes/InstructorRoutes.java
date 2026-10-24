@@ -13,6 +13,7 @@ public class InstructorRoutes {
         app.get("/api/instructors", controller::getAll);
         app.get("/api/instructors/{id}", controller::getById);
         app.post("/api/instructors", controller::create);
+        app.post("/api/instructors/login", controller::login);
         app.put("/api/instructors/{id}", controller::update);
         app.delete("/api/instructors/{id}", controller::delete);
     }
