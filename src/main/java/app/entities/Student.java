@@ -14,9 +14,8 @@ import java.util.List;
 @ToString
 @Entity
 @Table(name = "students")
-
-
 public class Student {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
@@ -30,8 +29,13 @@ public class Student {
     @Column
     private String phoneNumber;
 
+    @ToString.Exclude
     @Column(nullable = true)
     private String password;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "role")
+    private Role role = Role.STUDENT;
 
     @ManyToOne
     @JoinColumn(name = "instructor_id")

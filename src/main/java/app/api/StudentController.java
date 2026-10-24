@@ -3,24 +3,26 @@ package app.api;
 import app.dao.StudentDAOImpl;
 import app.dto.StudentRequestDTO;
 import app.dto.StudentResponseDTO;
+import app.dto.LoginRequestDTO;
 import app.entities.Student;
+import app.entities.Role;
+import app.security.Filter;
+import app.security.JWTToken;
 import io.javalin.http.Context;
 import lombok.RequiredArgsConstructor;
 import org.mindrot.jbcrypt.BCrypt;
-import app.dto.LoginRequestDTO;
-import org.mindrot.jbcrypt.BCrypt;
+
 import java.util.List;
 import java.util.Map;
-
-import app.security.JWTToken;
 
 @RequiredArgsConstructor
 public class StudentController {
     private final StudentDAOImpl studentDAO;
-
-
+    private final Filter filter = new Filter();
 
     public void getAll(Context ctx) {
+        filter.authorize(ctx, Role.INSTRUCTOR);
+
         List<StudentResponseDTO> students = studentDAO.getAll()
                 .stream()
                 .map(this::toResponse)
@@ -32,6 +34,8 @@ public class StudentController {
 
     public void getById(Context ctx) {
         int id = getId(ctx);
+        filter.authorizeStudent(ctx, id);
+
         Student student = studentDAO.getById(id);
 
         if (student == null) {
@@ -59,6 +63,7 @@ public class StudentController {
         );
 
         student.setPassword(hashedPassword);
+        student.setRole(Role.STUDENT);
 
         Student savedStudent = studentDAO.create(student);
 
@@ -68,6 +73,8 @@ public class StudentController {
 
     public void update(Context ctx) {
         int id = getId(ctx);
+        filter.authorizeStudent(ctx, id);
+
         Student student = studentDAO.getById(id);
 
         if (student == null) {
@@ -89,6 +96,8 @@ public class StudentController {
     }
 
     public void delete(Context ctx) {
+        filter.authorize(ctx, Role.INSTRUCTOR);
+
         int id = getId(ctx);
         Student student = studentDAO.getById(id);
 
@@ -125,9 +134,7 @@ public class StudentController {
         );
     }
 
-
     public void login(Context ctx) {
-
         LoginRequestDTO request = ctx.bodyAsClass(LoginRequestDTO.class);
 
         Student student = studentDAO.getByEmail(request.email());
@@ -137,16 +144,13 @@ public class StudentController {
                 !BCrypt.checkpw(request.password(), student.getPassword())) {
 
             ctx.status(401);
-            ctx.json(new ErrorResponse(401, "Forkert email eller password"));
+            ctx.json(new ErrorResponse(401, "Invalid email or password"));
             return;
         }
 
-        String token = JWTToken.generateToken(student.getId());
+        String token = JWTToken.generateToken(student.getId(), student.getRole());
 
         ctx.status(200);
-        ctx.json(Map.of("message", "Login successful", "token", token
-        ));
+        ctx.json(Map.of("message", "Login successful", "token", token));
     }
-
-
 }

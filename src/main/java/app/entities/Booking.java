@@ -23,12 +23,12 @@ public class Booking {
     @Column
     private LocalDateTime bookingTime;
 
-    @ManyToOne
-    @JoinColumn(name = "student_id")
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "student_id", nullable = false)
     private Student student;
 
-    @ManyToOne
-    @JoinColumn(name = "lesson_id")
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "lesson_id", nullable = false)
     private Lesson lesson;
 
     public Booking(LocalDateTime bookingTime) {

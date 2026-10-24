@@ -7,7 +7,9 @@ import app.dto.BookingRequestDTO;
 import app.dto.BookingResponseDTO;
 import app.entities.Booking;
 import app.entities.Lesson;
+import app.entities.Role;
 import app.entities.Student;
+import app.security.Filter;
 import io.javalin.http.Context;
 import lombok.RequiredArgsConstructor;
 
@@ -19,8 +21,11 @@ public class BookingController {
     private final BookingDAOImpl bookingDAO;
     private final StudentDAOImpl studentDAO;
     private final LessonDAOImpl lessonDAO;
+    private final Filter filter = new Filter();
 
     public void getAll(Context ctx) {
+        filter.authorize(ctx, Role.INSTRUCTOR);
+
         List<BookingResponseDTO> bookings = bookingDAO.getAll()
                 .stream()
                 .map(this::toResponse)
@@ -40,12 +45,16 @@ public class BookingController {
             return;
         }
 
+        filter.authorizeStudent(ctx, booking.getStudent().getId());
+
         ctx.status(200);
         ctx.json(toResponse(booking));
     }
 
     public void create(Context ctx) {
         BookingRequestDTO request = getValidatedRequest(ctx);
+
+        filter.authorizeStudent(ctx, request.studentId());
 
         Student student = studentDAO.getById(request.studentId());
 
@@ -81,6 +90,8 @@ public class BookingController {
     }
 
     public void update(Context ctx) {
+        filter.authorize(ctx, Role.INSTRUCTOR);
+
         int id = getId(ctx);
         Booking booking = bookingDAO.getById(id);
 
@@ -127,6 +138,8 @@ public class BookingController {
             ctx.json(new ErrorResponse(404, "Booking not found"));
             return;
         }
+
+        filter.authorizeStudent(ctx, booking.getStudent().getId());
 
         bookingDAO.delete(id);
         ctx.status(204);

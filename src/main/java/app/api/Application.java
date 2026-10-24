@@ -8,23 +8,22 @@ import app.dao.BookingDAOImpl;
 import app.dao.InstructorDAOImpl;
 import app.dao.LessonDAOImpl;
 import app.dao.StudentDAOImpl;
-import app.entities.Lesson;
+import app.dto.DrivingAiRequestDTO;
+import app.entities.Role;
+import app.security.Filter;
+import app.services.DrivingAiService;
 import io.javalin.Javalin;
+import io.javalin.http.HandlerType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Map;
-import app.security.Filter;
 
 public class Application {
 
     private static final Logger logger = LoggerFactory.getLogger(Application.class);
 
     public static void main(String[] args) {
-
-        System.out.println("JWT_SECRET fundet: " +
-                (System.getenv("JWT_SECRET") != null));
-
         StudentDAOImpl studentDAO = new StudentDAOImpl();
         InstructorDAOImpl instructorDAO = new InstructorDAOImpl();
         LessonDAOImpl lessonDAO = new LessonDAOImpl();
@@ -40,53 +39,58 @@ public class Application {
         LessonRoutes lessonRoutes = new LessonRoutes(lessonController);
         BookingRoutes bookingRoutes = new BookingRoutes(bookingController);
 
+        DrivingAiService drivingAiService = new DrivingAiService();
+
         Javalin app = Javalin.create();
 
         Filter filter = new Filter();
 
-        app.before("/api/bookings", ctx -> {
-            if (ctx.method() == io.javalin.http.HandlerType.POST)
-            {filter.authenticate(ctx);}
+        app.before(ctx -> {
+            String path = ctx.path();
+
+            boolean isRegistration = path.equals("/api/students") && ctx.method() == HandlerType.POST;
+            boolean isStudentLogin = path.equals("/api/students/login") && ctx.method() == HandlerType.POST;
+            boolean isInstructorLogin = path.equals("/api/instructors/login") && ctx.method() == HandlerType.POST;
+            boolean isHealth = path.equals("/api/health");
+
+            if (path.startsWith("/api/") && !isRegistration && !isStudentLogin && !isInstructorLogin && !isHealth) {
+                filter.authenticate(ctx);
+            }
+
+            if (path.equals("/api/instructors") && ctx.method() == HandlerType.POST) {
+                filter.authorize(ctx, Role.INSTRUCTOR);
+            }
         });
 
         app.exception(Exception.class, (exception, ctx) -> {
-            logger.error(
-                    "Unhandled error on {} {}",
-                    ctx.method(),
-                    ctx.path(),
-                    exception
-            );
-
+            logger.error("Unhandled error on {} {}", ctx.method(), ctx.path(), exception);
             ctx.status(500);
             ctx.json(new ErrorResponse(500, "Internal server error"));
         });
 
-        app.before(ctx -> {
-            logger.info("{} {}", ctx.method(), ctx.path());
-        });
+        app.before(ctx -> logger.info("{} {}", ctx.method(), ctx.path()));
+        app.after(ctx -> logger.info("{} {} -> {}", ctx.method(), ctx.path(), ctx.status()));
 
-        app.after(ctx -> {
-            logger.info(
-                    "{} {} -> {}",
-                    ctx.method(),
-                    ctx.path(),
-                    ctx.status()
-            );
-        });
+        app.get("/api/health", ctx -> ctx.json(Map.of("status", "ok", "message", "API is running")));
 
-        app.get("/api/health", ctx -> {
-            ctx.json(Map.of(
-                    "status", "ok",
-                    "message", "API is running"
-            ));
+        app.post("/api/ai/driving-advice", ctx -> {
+            DrivingAiRequestDTO request = ctx.bodyAsClass(DrivingAiRequestDTO.class);
+
+            if (request.question() == null || request.question().isBlank()) {
+                ctx.status(400);
+                ctx.json(Map.of("error", "Question is required"));
+                return;
+            }
+
+            String answer = drivingAiService.askDrivingAssistant(request.question()).join();
+
+            ctx.json(Map.of("answer", answer));
         });
 
         studentRoutes.register(app);
         instructorRoutes.register(app);
         lessonRoutes.register(app);
         bookingRoutes.register(app);
-
-
 
         app.start(7070);
     }
