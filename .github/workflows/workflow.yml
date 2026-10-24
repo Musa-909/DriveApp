@@ -34,6 +34,10 @@ jobs:
       DB_PASSWORD: testpassword
       JWT_SECRET: ${{ secrets.JWT_SECRET }}
       GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+      TEST_INSTRUCTOR_EMAIL: ${{ secrets.TEST_INSTRUCTOR_EMAIL }}
+      TEST_INSTRUCTOR_PASSWORD: ${{ secrets.TEST_INSTRUCTOR_PASSWORD }}
+      TEST_STUDENT_EMAIL: ${{ secrets.TEST_STUDENT_EMAIL }}
+      TEST_STUDENT_PASSWORD: ${{ secrets.TEST_STUDENT_PASSWORD }}
 
     steps:
       - name: Checkout code
