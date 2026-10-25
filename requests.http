@@ -1,9 +1,10 @@
+
 POST https://driveapp.website/api/students
 Content-Type: application/json
 
 {
-  "name": "Karl Smart",
-  "email": "Karl.Smart@example.com",
-  "phoneNumber": "28475619",
-  "password": "Karl123"
+  "name": "Oliver Jensen",
+  "email": "oliver.produktion@test.dk",
+  "password": "Test1234!",
+  "phoneNumber": "12345678"
 }
