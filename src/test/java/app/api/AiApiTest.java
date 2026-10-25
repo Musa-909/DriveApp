@@ -47,6 +47,7 @@ public class AiApiTest {
         String email = System.getenv("TEST_STUDENT_EMAIL");
         String password = System.getenv("TEST_STUDENT_PASSWORD");
 
+
         if (email == null || email.isBlank()
                 || password == null || password.isBlank()) {
             throw new IllegalStateException(
