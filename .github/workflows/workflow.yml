@@ -69,6 +69,50 @@ jobs:
           cat driveapp.log
           exit 1
 
+      # Create login accounts in the temporary test database
+      - name: Create test users
+        env:
+          PGPASSWORD: testpassword
+        run: |
+          set -euo pipefail
+
+          test -n "$TEST_INSTRUCTOR_EMAIL"
+          test -n "$TEST_INSTRUCTOR_PASSWORD"
+          test -n "$TEST_STUDENT_EMAIL"
+          test -n "$TEST_STUDENT_PASSWORD"
+
+          psql -h localhost -U testuser -d driveapp_test \
+            -v instructor_email="$TEST_INSTRUCTOR_EMAIL" \
+            -v instructor_password="$TEST_INSTRUCTOR_PASSWORD" \
+            -v student_email="$TEST_STUDENT_EMAIL" \
+            -v student_password="$TEST_STUDENT_PASSWORD" <<'SQL'
+          \set ON_ERROR_STOP on
+
+          CREATE EXTENSION IF NOT EXISTS pgcrypto;
+
+          INSERT INTO instructors
+            (name, email, password, phonenumber, role)
+          VALUES
+            (
+              'Test Lærer',
+              :'instructor_email',
+              crypt(:'instructor_password', gen_salt('bf')),
+              '12345678',
+              'INSTRUCTOR'
+            );
+
+          INSERT INTO students
+            (name, email, password, phonenumber, role)
+          VALUES
+            (
+              'Test Elev',
+              :'student_email',
+              crypt(:'student_password', gen_salt('bf')),
+              '87654321',
+              'STUDENT'
+            );
+          SQL
+
       - name: Run automated tests
         run: mvn test
 
@@ -101,3 +145,4 @@ jobs:
           context: .
           push: true
           tags: amaanm3/driveapp:latest
+
