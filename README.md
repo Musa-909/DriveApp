@@ -85,7 +85,7 @@ The application includes an AI driving assistant, where students can ask questio
 - Caddy & Watchtower
 - DanDomain (Domain & DNS)
 
-## Architecture diagram
+---
 
 ## Architecture Diagram
 
@@ -390,29 +390,52 @@ We can check if the REST API is running by opening:
 
 `http://localhost:7070/api/health`
 
+### Creating the First Instructor
+
+Creating an instructor through `POST /api/instructors` requires an existing instructor account with a valid JWT token. Therefore, the first instructor must be added directly to the database with a BCrypt-hashed password. Once the account has been created, the instructor can log in through `POST /api/instructors/login` and create additional instructor accounts through the API.
+
 ## Tests
 
-We use **JUnit and REST Assured** to test DriveApp and make sure our backend works as expected.
+We use **JUnit and REST Assured** to test DriveApp and verify that our backend works as expected.
 
 Our tests cover different parts of the application:
 
 - **API Tests:** Testing endpoints for students, instructors, lessons, bookings, and our AI assistant.
 - **DAO Tests:** Testing database operations such as creating, retrieving, updating, and deleting data.
-- **Security Tests:** Testing JWT authentication and BCrypt password hashing.
+- **Security Tests:** Testing JWT authentication, BCrypt password hashing, and role-based authorization.
 - **AI Tests:** Testing our `DrivingAiService` and how it handles responses from Google Gemini.
 
-We use a separate PostgreSQL test database called `driveapp_test` in GitHub Actions. The workflow starts the database, creates test accounts, and runs our tests automatically when we push changes to `main`.
+### Automated Testing with GitHub Actions
 
-This allows us to test our application without affecting the production database.
+We use GitHub Actions to automatically build and test DriveApp whenever changes are pushed to the `main` branch. The workflow can also be started manually.
 
-To run the tests manually:
+Our testing workflow:
+
+1. Starts a PostgreSQL 16 test database called `driveapp_test`.
+2. Sets up Java 17 and builds the application using Maven.
+3. Starts the DriveApp REST API on port `7070` and checks that the health endpoint responds.
+4. Creates test accounts for a student and an instructor.
+5. Runs the automated tests using `mvn test`.
+6. Stops the running API after testing.
+7. Builds and pushes the Docker image to Docker Hub if the previous steps succeed.
+
+The test database is separate from our production database, so automated tests do not affect real application data.
+
+### Running Tests Locally
+
+To run the tests locally, PostgreSQL must be running with a configured test database.
+
+The DriveApp API must also be running on port `7070`, and the required test accounts and environment variables must be configured.
+
+Once the test environment is ready, run:
 
 ```bash
 mvn test
 ```
 
-When running API tests locally, the test database, running application, and required environment variables must be configured.
+This allows us to test our application locally before pushing changes to GitHub.
 
+By using automated testing in our CI/CD pipeline, we can verify that our backend works correctly before a new Docker image is pushed to Docker Hub and deployed through Watchtower.
 ## CI/CD and Deployment
 
 We use GitHub Actions, Docker, Docker Hub, and DigitalOcean to build, test, and deploy DriveApp.
