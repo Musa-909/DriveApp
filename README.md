@@ -1,1182 +1,192 @@
-# REST API Documentation
+## Vision
 
-## Base URL
+Our goal with DriveApp was to create a backend system for a driving school that makes it easier to manage students, instructors, driving lessons, and bookings.
 
-```text
-http://localhost:7070
-```
+Students can create an account, log in, view available driving lessons, and book a lesson. Instructors can manage student information, create and update lessons, and keep track of bookings.
 
+We also wanted to include something extra in our project, so we added an AI driving assistant using Google Gemini. The assistant allows students to ask questions about driving theory, traffic rules, and road safety.
 
-## Endpoints
-
-| Method | URL | Request Body | Success Response | Errors |
-|---|---|---|---|---|
-| GET | `/api/health` | None | `200 OK` | `500 Internal Server Error` |
-| GET | `/api/students` | None | `200 OK` | `500 Internal Server Error` |
-| GET | `/api/students/{id}` | None | `200 OK` | `400 Bad Request`, `404 Not Found` |
-| POST | `/api/students` | Student request | `201 Created` | `400 Bad Request`, `500 Internal Server Error` |
-| POST | `/api/students/login` | Login request | `200 OK` | `401 Unauthorized` |
-| PUT | `/api/students/{id}` | Student request | `200 OK` | `400 Bad Request`, `404 Not Found` |
-| DELETE | `/api/students/{id}` | None | `204 No Content` | `400 Bad Request`, `404 Not Found` |
-| GET | `/api/instructors` | None | `200 OK` | `500 Internal Server Error` |
-| GET | `/api/instructors/{id}` | None | `200 OK` | `400 Bad Request`, `404 Not Found` |
-| POST | `/api/instructors` | Instructor request | `201 Created` | `400 Bad Request`, `500 Internal Server Error` |
-| PUT | `/api/instructors/{id}` | Instructor request | `200 OK` | `400 Bad Request`, `404 Not Found` |
-| DELETE | `/api/instructors/{id}` | None | `204 No Content` | `400 Bad Request`, `404 Not Found` |
-| GET | `/api/lessons` | None | `200 OK` | `500 Internal Server Error` |
-| GET | `/api/lessons/{id}` | None | `200 OK` | `400 Bad Request`, `404 Not Found` |
-| POST | `/api/lessons` | Lesson request | `201 Created` | `400 Bad Request`, `404 Not Found`, `500 Internal Server Error` |
-| PUT | `/api/lessons/{id}` | Lesson request | `200 OK` | `400 Bad Request`, `404 Not Found` |
-| DELETE | `/api/lessons/{id}` | None | `204 No Content` | `400 Bad Request`, `404 Not Found` |
-| GET | `/api/bookings` | None | `200 OK` | `500 Internal Server Error` |
-| GET | `/api/bookings/{id}` | None | `200 OK` | `400 Bad Request`, `404 Not Found` |
-| POST | `/api/bookings` | Booking request + JWT | `201 Created` | `400 Bad Request`, `401 Unauthorized`, `404 Not Found`, `500 Internal Server Error` |
-| PUT | `/api/bookings/{id}` | Booking request | `200 OK` | `400 Bad Request`, `404 Not Found` |
-| DELETE | `/api/bookings/{id}` | None | `204 No Content` | `400 Bad Request`, `404 Not Found` |
+We developed DriveApp as our third-semester backend project to use what we have learned about Java, REST APIs, databases, security, testing, and deployment. Our focus was to build a working backend where the different parts of the application work together.
 
 ---
 
-# Health Check
+## Project Links
 
-
-Checks whether the REST API is running.
-
-## Request
-
-```text
-GET /api/health
-```
-
-## Response
-
-**200 OK**
-
-```json
-{
-  "status": "ok",
-  "message": "API is running"
-}
-```
+| Resource | Description | Link |
+|---|---|---|
+| **GitHub Repository** | Complete source code, documentation, and project development. | [DriveApp Repository](https://github.com/Musa-909/DriveApp) |
+| **Live Application** | Deployed REST API running on our production server. | [https://driveapp.website](https://driveapp.website) |
+| **API Health Check** | Endpoint used to verify that the backend is running. | [GET /api/health](https://driveapp.website/api/health) |
+| **Project Video** | Short walkthrough of the system, architecture, and main features. | Coming soon |
 
 ---
 
-# Student API
+## Group Project
 
-## Get All Students
+DriveApp is a collaborative third-semester backend examination project developed by **Amaan Mahomed** and **Musa Sayed**. We worked together on designing, implementing, testing, documenting, and deploying the application.
 
-Returns all students stored in the database.
-
-### Request
-
-```text
-GET /api/students
-```
-
-### Response
-
-**200 OK**
-
-Example:
-
-```json
-[
-  {
-    "id": 1,
-    "name": "Musa Sayed",
-    "email": "musa@example.com",
-    "phoneNumber": "12345678"
-  },
-  {
-    "id": 2,
-    "name": "Amaan Mahomed",
-    "email": "amaan@example.com",
-    "phoneNumber": "87654321"
-  }
-]
-```
+| Team Member | Project Contribution | GitHub | Portfolio |
+|---|---|---|---|
+| **Amaan Mahomed** | Backend development, testing, documentation, and deployment | [@AmaanM3](https://github.com/AmaanM3) | [View Portfolio](https://amaanm3.github.io/portfolio2026/) |
+| **Musa Sayed** | Backend development, testing, documentation, and deployment | [@Musa-909](https://github.com/Musa-909) | Coming soon |
 
 ---
 
-## Get Student By ID
+## Relevant Course Topics
 
-Returns a student with the given ID.
+During our third semester, we have worked with different backend topics that we have used in DriveApp.
 
-### Request
+The table below shows the main course topics and how we have applied them in our project.
 
-```text
-GET /api/students/{id}
-```
+| Course Topic | How We Used It in DriveApp | Course Material |
+|---|---|---|
+| **01 JPA Basics** | We used Hibernate/JPA and DAO classes to store and manage data in PostgreSQL. | [JPA Basics](https://3sem.kursusmaterialer.dk/backend/jpa-basics/) |
+| **02 JPA Relations** | We created relationships between students, instructors, lessons, and bookings. | [JPA Relations](https://3sem.kursusmaterialer.dk/backend/jpa-relations/) |
+| **03 Data Integration** | We used DTOs, JSON, and Java HttpClient to exchange data and communicate with Google Gemini. | [Data Integration](https://3sem.kursusmaterialer.dk/backend/data-integration/) |
+| **04 Concurrency** | We used `CompletableFuture` to handle asynchronous HTTP requests to Google Gemini. | [Concurrency](https://3sem.kursusmaterialer.dk/backend/concurrency/) |
+| **05 REST API Intro** | We built our REST API using Javalin, routes, controllers, and HTTP methods. | [REST API Intro](https://3sem.kursusmaterialer.dk/backend/rest-intro/) |
+| **06 REST & Test** | We used JUnit and REST Assured to test our API endpoints and functionality. | [REST & Test](https://3sem.kursusmaterialer.dk/backend/rest-test/) |
+| **07 Security** | We implemented JWT authentication, BCrypt password hashing, and role-based authorization. | [Security](https://3sem.kursusmaterialer.dk/backend/security/) |
+| **08 Deployment & DevOps** | We used GitHub Actions, Docker, Docker Hub, and DigitalOcean to deploy our backend. | [Deployment & DevOps](https://3sem.kursusmaterialer.dk/backend/deployment/) |
 
-Example:
-
-```text
-GET /api/students/1
-```
-
-### Response
-
-**200 OK**
-
-```json
-{
-  "id": 1,
-  "name": "Musa Sayed",
-  "email": "musa@example.com",
-  "phoneNumber": "12345678"
-}
-```
-
-### Errors
-
-**400 Bad Request**
-
-Returned if the ID is invalid.
-
-**404 Not Found**
-
-Returned if no student exists with the given ID.
-
-```json
-{
-  "status": 404,
-  "message": "Student not found"
-}
-```
+These topics helped us apply what we learned during the semester to a working backend application.
 
 ---
 
+## Architecture
 
-## Create Student
+### System Overview
 
-Creates and stores a new student.
+DriveApp is built as a layered Java backend using Javalin, Hibernate/JPA, and PostgreSQL. We have separated the application into different layers to make the code easier to understand, maintain, and work with.
 
-Student passwords are hashed using BCrypt before being stored in the database.
+Javalin handles the HTTP requests and connects them to the correct routes and controllers. The controllers handle incoming data, validate requests, and manage the application logic. We use DAO classes to communicate with the database through Hibernate/JPA, while PostgreSQL stores information about students, instructors, lessons, and bookings.
 
-### Request
+We have also implemented JWT authentication and role-based authorization to protect our endpoints and control which features students and instructors can access.
 
-```text
-POST /api/students
-```
+The application includes an AI driving assistant, where students can ask questions about driving theory and traffic rules. These requests are handled by `DrivingAiService`, which communicates with the Google Gemini API.
 
-**Content-Type: application/json**
+### Technologies
 
-```json
-{
-  "name": "Musa Sayed",
-  "email": "musa@example.com",
-  "phoneNumber": "12345678",
-  "password": "Test1234"
-}
-```
+- Java 17
+- Maven
+- Javalin
+- Hibernate / JPA
+- PostgreSQL
+- HikariCP
+- Jackson
+- Lombok
+- JWT & BCrypt
+- Google Gemini API
+- JUnit & REST Assured
+- Testcontainers
+- Docker & Docker Hub
+- GitHub Actions
+- DigitalOcean
+- Caddy & Watchtower
+- DanDomain (Domain & DNS)
 
-### Response
+## Architecture diagram
 
-**201 Created**
+## Architecture Diagram
 
-```json
-{
-  "id": 1,
-  "name": "Musa Sayed",
-  "email": "musa@example.com",
-  "phoneNumber": "12345678"
-}
-```
+The architecture diagram shows how the different parts of DriveApp work together. It gives an overview of how HTTP requests are handled, how data is stored in the database, and how our AI assistant connects to Google Gemini.
 
-### Validation
+![DriveApp Architecture Diagram](DOCS/architecture.png)
 
-- `name` must not be empty
-- `email` must not be empty
-- `phoneNumber` must not be empty
+We use Javalin to handle HTTP requests, controllers to manage application logic, and DAO classes with Hibernate/JPA to communicate with PostgreSQL.
 
-Invalid input returns:
+JWT authentication protects our endpoints. Registration, login, and health checks are public, while the other endpoints require a valid token. Our AI assistant is handled through `DrivingAiService`, which communicates with the Google Gemini API.
 
-```text
-400 Bad Request
-```
+## Key Design Decisions
 
----
+**Layered Architecture and DTOs.** 
+We separated our code into routes, controllers, and DAO classes to keep the project organized. We also use DTOs to control what data is sent and received through our API, so sensitive information like passwords is not returned.
 
+**Authentication and Roles.** 
+We use BCrypt to hash passwords and JWT for authentication. Students and instructors have different roles, which determine what they are allowed to access. Students can only manage their own profile, while instructors have access to administrative features.
 
-## Update Student
+**Bookings and Availability.** 
+Students can book available driving lessons. Before creating a booking, we check that the student and lesson exist and that the lesson has not already been booked. Available lessons are found by checking which lessons have no bookings.
 
-Updates an existing student.
+**AI Integration.**
+We integrated Google Gemini through our `DrivingAiService` class. We use Java HttpClient and `CompletableFuture` to send questions to Gemini and receive answers. The API waits for the AI response before returning it to the user.
 
-### Request
-
-```text
-PUT /api/students/{id}
-```
-
-Example:
-
-```text
-PUT /api/students/1
-```
-
-**Content-Type: application/json**
-
-```json
-{
-  "name": "Musa Sayed",
-  "email": "musa.sayed@example.com",
-  "phoneNumber": "11223344"
-}
-```
-
-### Response
-
-**200 OK**
-
-```json
-{
-  "id": 1,
-  "name": "Musa Sayed",
-  "email": "musa.sayed@example.com",
-  "phoneNumber": "11223344"
-}
-```
-
-### Errors
-
-**400 Bad Request**
-
-Returned if the ID or request body is invalid.
-
-**404 Not Found**
-
-Returned if the student does not exist.
-
-```json
-{
-  "status": 404,
-  "message": "Student not found"
-}
-```
+**Error Handling and Logging.** We use HTTP status codes, validation, and JSON error messages to handle invalid requests. We also use logging to keep track of requests and unexpected errors.
 
 ---
 
-## Delete Student
+## Data Model
 
-Deletes a student from the database.
+### Entity Relationship Diagram (ERD)
 
-### Request
+The ERD shows how our PostgreSQL database is structured, including the tables, attributes, and relationships between students, instructors, lessons, and bookings.
 
-```text
-DELETE /api/students/{id}
-```
+![DriveApp ER Diagram](DOCS/ERD.png)
 
-Example:
+### Domain Model
 
-```text
-DELETE /api/students/1
-```
+The domain model shows the main concepts in our driving school system and how they are connected, without focusing on database details.
 
-### Response
+![DriveApp Domain Model](DOCS/domain-model.png)
 
-**204 No Content**
+### Important Entities
 
-No response body is returned.
-
-### Errors
-
-**400 Bad Request**
-
-Returned if the ID is invalid.
-
-**404 Not Found**
-
-Returned if the student does not exist.
-
-```json
-{
-  "status": 404,
-  "message": "Student not found"
-}
-```
+| Entity | Purpose | Relationships |
+|---|---|---|
+| **Student** | Stores student information, login details, and contact information. | Can have an instructor and multiple bookings. |
+| **Instructor** | Stores instructor information and login details. | Can have multiple students and lessons. |
+| **Lesson** | Represents a driving lesson with a time, duration, and lesson type. | Can have an instructor and be connected to bookings. |
+| **Booking** | Connects a student to a driving lesson. | Must reference a student and a lesson. |
 
 ---
 
-## Student JSON Format
+# API Documentation
 
-### Request DTO
+DriveApp provides a REST API for managing students, instructors, driving lessons, and bookings. The API also includes an AI driving assistant that can answer questions about driving theory and traffic rules.
 
-```json
-{
-  "name": "Musa Sayed",
-  "email": "musa@example.com",
-  "phoneNumber": "12345678"
-}
-```
+**Local URL:** `http://localhost:7070`
 
-### Response DTO
+**Production URL:** `https://driveapp.website`
 
-```json
-{
-  "id": 1,
-  "name": "Musa Sayed",
-  "email": "musa@example.com",
-  "phoneNumber": "12345678"
-}
-```
+## Endpoint Overview
 
----
+| Area | Main Endpoints | Access |
+|---|---|---|
+| **Health** | `GET /api/health` | Public |
+| **Registration & Login** | `POST /api/students`, `POST /api/students/login`, `POST /api/instructors/login` | Public |
+| **Students** | `GET /api/students`, `GET/PUT/DELETE /api/students/{id}` | JWT, role and ownership checks |
+| **Instructors** | `GET/POST /api/instructors`, `GET/PUT/DELETE /api/instructors/{id}` | Instructor |
+| **Lessons** | `GET/POST /api/lessons`, `GET/PUT/DELETE /api/lessons/{id}`, `GET /api/lessons/available` | JWT, instructor required for changes |
+| **Bookings** | `GET/POST /api/bookings`, `GET/PUT/DELETE /api/bookings/{id}` | JWT, role and ownership checks |
+| **AI Assistant** | `POST /api/ai/driving-advice` | JWT |
 
-# Instructor API
+We use JWT authentication to protect our endpoints. Students can view and update their own profiles, while instructors can manage student information, lessons, and bookings.
 
-## Get All Instructors
+Students can also view available driving lessons and create bookings for themselves. An instructor account is required to create, update, or delete driving lessons.
 
-Returns all instructors stored in the database.
+## Example Endpoints
 
-### Request
+Below are some examples of how we use the main endpoints in DriveApp.
 
-```text
-GET /api/instructors
-```
+### 1. Student Login
 
-### Response
+Students can log in using their email and password. If the login is successful, the API returns a JWT token.
 
-**200 OK**
+**Request:**
 
-Example:
-
-```json
-[
-  {
-    "id": 1,
-    "name": "Amaan Mahomed",
-    "email": "amaan@drivingschool.dk",
-    "phoneNumber": "87654321"
-  }
-]
-```
-
----
-
-## Get Instructor By ID
-
-Returns an instructor with the given ID.
-
-### Request
-
-```text
-GET /api/instructors/{id}
-```
-
-Example:
-
-```text
-GET /api/instructors/1
-```
-
-### Response
-
-**200 OK**
-
-```json
-{
-  "id": 1,
-  "name": "Amaan Mahomed",
-  "email": "amaan@drivingschool.dk",
-  "phoneNumber": "87654321"
-}
-```
-
-### Errors
-
-**400 Bad Request**
-
-Returned if the ID is invalid.
-
-**404 Not Found**
-
-Returned if no instructor exists with the given ID.
-
-```json
-{
-  "status": 404,
-  "message": "Instructor not found"
-}
-```
-
----
-
-## Create Instructor
-
-Creates and stores a new instructor.
-
-### Request
-
-```text
-POST /api/instructors
-```
-
-**Content-Type: application/json**
-
-```json
-{
-  "name": "Amaan Mahomed",
-  "email": "amaan@drivingschool.dk",
-  "phoneNumber": "87654321"
-}
-```
-
-### Response
-
-**201 Created**
-
-```json
-{
-  "id": 1,
-  "name": "Amaan Mahomed",
-  "email": "amaan@drivingschool.dk",
-  "phoneNumber": "87654321"
-}
-```
-
-### Validation
-
-- `name` must not be empty
-- `email` must not be empty
-- `phoneNumber` must not be empty
-
-Invalid input returns:
-
-```text
-400 Bad Request
-```
-
----
-
-## Update Instructor
-
-Updates an existing instructor.
-
-### Request
-
-```text
-PUT /api/instructors/{id}
-```
-
-Example:
-
-```text
-PUT /api/instructors/1
-```
-
-**Content-Type: application/json**
-
-```json
-{
-  "name": "Amaan Mahomed",
-  "email": "amaan.mahomed@drivingschool.dk",
-  "phoneNumber": "88776655"
-}
-```
-
-### Response
-
-**200 OK**
-
-```json
-{
-  "id": 1,
-  "name": "Amaan Mahomed",
-  "email": "amaan.mahomed@drivingschool.dk",
-  "phoneNumber": "88776655"
-}
-```
-
-### Errors
-
-**400 Bad Request**
-
-Returned if the ID or request body is invalid.
-
-**404 Not Found**
-
-Returned if the instructor does not exist.
-
-```json
-{
-  "status": 404,
-  "message": "Instructor not found"
-}
-```
-
----
-
-## Delete Instructor
-
-Deletes an instructor from the database.
-
-### Request
-
-```text
-DELETE /api/instructors/{id}
-```
-
-Example:
-
-```text
-DELETE /api/instructors/1
-```
-
-### Response
-
-**204 No Content**
-
-No response body is returned.
-
-### Errors
-
-**400 Bad Request**
-
-Returned if the ID is invalid.
-
-**404 Not Found**
-
-Returned if the instructor does not exist.
-
-```json
-{
-  "status": 404,
-  "message": "Instructor not found"
-}
-```
-
----
-
-## Instructor JSON Format
-
-### Request DTO
-
-```json
-{
-  "name": "Amaan Mahomed",
-  "email": "amaan@drivingschool.dk",
-  "phoneNumber": "87654321"
-}
-```
-
-### Response DTO
-
-```json
-{
-  "id": 1,
-  "name": "Amaan Mahomed",
-  "email": "amaan@drivingschool.dk",
-  "phoneNumber": "87654321"
-}
-```
-
----
-
-# Lesson API
-
-## Get All Lessons
-
-Returns all lessons stored in the database.
-
-### Request
-
-```text
-GET /api/lessons
-```
-
-### Response
-
-**200 OK**
-
-Example:
-
-```json
-[
-  {
-    "id": 1,
-    "lessonTime": "2026-10-05T14:00:00",
-    "durationMinutes": 45,
-    "lessonType": "PRACTICAL",
-    "instructorId": 1
-  }
-]
-```
-
----
-
-## Get Lesson By ID
-
-Returns a lesson with the given ID.
-
-### Request
-
-```text
-GET /api/lessons/{id}
-```
-
-Example:
-
-```text
-GET /api/lessons/1
-```
-
-### Response
-
-**200 OK**
-
-```json
-{
-  "id": 1,
-  "lessonTime": "2026-10-05T14:00:00",
-  "durationMinutes": 45,
-  "lessonType": "PRACTICAL",
-  "instructorId": 1
-}
-```
-
-### Errors
-
-**400 Bad Request**
-
-Returned if the ID is invalid.
-
-**404 Not Found**
-
-Returned if no lesson exists with the given ID.
-
-```json
-{
-  "status": 404,
-  "message": "Lesson not found"
-}
-```
-
----
-
-## Create Lesson
-
-Creates and stores a new lesson.
-
-The `instructorId` must refer to an existing instructor.
-
-### Request
-
-```text
-POST /api/lessons
-```
-
-**Content-Type: application/json**
-
-```json
-{
-  "lessonTime": "2026-10-05T14:00:00",
-  "durationMinutes": 45,
-  "lessonType": "PRACTICAL",
-  "instructorId": 1
-}
-```
-
-### Response
-
-**201 Created**
-
-```json
-{
-  "id": 1,
-  "lessonTime": "2026-10-05T14:00:00",
-  "durationMinutes": 45,
-  "lessonType": "PRACTICAL",
-  "instructorId": 1
-}
-```
-
-### Validation
-
-- `lessonTime` is required
-- `durationMinutes` must be greater than 0
-- `lessonType` is required
-- `instructorId` must be greater than 0
-
-Invalid input returns:
-
-```text
-400 Bad Request
-```
-
-If the instructor does not exist:
-
-```text
-404 Not Found
-```
-
-```json
-{
-  "status": 404,
-  "message": "Instructor not found"
-}
-```
-
----
-
-## Update Lesson
-
-Updates an existing lesson.
-
-### Request
-
-```text
-PUT /api/lessons/{id}
-```
-
-Example:
-
-```text
-PUT /api/lessons/1
-```
-
-**Content-Type: application/json**
-
-```json
-{
-  "lessonTime": "2026-10-05T15:00:00",
-  "durationMinutes": 60,
-  "lessonType": "PRACTICAL",
-  "instructorId": 1
-}
-```
-
-### Response
-
-**200 OK**
-
-```json
-{
-  "id": 1,
-  "lessonTime": "2026-10-05T15:00:00",
-  "durationMinutes": 60,
-  "lessonType": "PRACTICAL",
-  "instructorId": 1
-}
-```
-
-### Errors
-
-**400 Bad Request**
-
-Returned if the ID or request body is invalid.
-
-**404 Not Found**
-
-Returned if the lesson or instructor does not exist.
-
-```json
-{
-  "status": 404,
-  "message": "Lesson not found"
-}
-```
-
-or:
-
-```json
-{
-  "status": 404,
-  "message": "Instructor not found"
-}
-```
-
----
-
-## Delete Lesson
-
-Deletes a lesson from the database.
-
-### Request
-
-```text
-DELETE /api/lessons/{id}
-```
-
-Example:
-
-```text
-DELETE /api/lessons/1
-```
-
-### Response
-
-**204 No Content**
-
-No response body is returned.
-
-### Errors
-
-**400 Bad Request**
-
-Returned if the ID is invalid.
-
-**404 Not Found**
-
-Returned if the lesson does not exist.
-
-```json
-{
-  "status": 404,
-  "message": "Lesson not found"
-}
-```
-
----
-
-## Lesson JSON Format
-
-### Request DTO
-
-```json
-{
-  "lessonTime": "2026-10-05T14:00:00",
-  "durationMinutes": 45,
-  "lessonType": "PRACTICAL",
-  "instructorId": 1
-}
-```
-
-### Response DTO
-
-```json
-{
-  "id": 1,
-  "lessonTime": "2026-10-05T14:00:00",
-  "durationMinutes": 45,
-  "lessonType": "PRACTICAL",
-  "instructorId": 1
-}
-```
-
----
-
-# Booking API
-
-## Get All Bookings
-
-Returns all bookings stored in the database.
-
-### Request
-
-```text
-GET /api/bookings
-```
-
-### Response
-
-**200 OK**
-
-Example:
-
-```json
-[
-  {
-    "id": 1,
-    "bookingTime": "2026-10-02T18:00:00",
-    "studentId": 1,
-    "lessonId": 1
-  }
-]
-```
-
----
-
-## Get Booking By ID
-
-Returns a booking with the given ID.
-
-### Request
-
-```text
-GET /api/bookings/{id}
-```
-
-Example:
-
-```text
-GET /api/bookings/1
-```
-
-### Response
-
-**200 OK**
-
-```json
-{
-  "id": 1,
-  "bookingTime": "2026-10-02T18:00:00",
-  "studentId": 1,
-  "lessonId": 1
-}
-```
-
-### Errors
-
-**400 Bad Request**
-
-Returned if the ID is invalid.
-
-**404 Not Found**
-
-Returned if no booking exists with the given ID.
-
-```json
-{
-  "status": 404,
-  "message": "Booking not found"
-}
-```
-
----
-
-## Create Booking
-
-Creates and stores a new booking.
-
-The `studentId` must refer to an existing student, and the `lessonId` must refer to an existing lesson.
-
-A lesson cannot be booked if it is already booked.
-
-### Request
-
-```text
-POST /api/bookings
-```
-
-**Content-Type: application/json**
-
-```json
-{
-  "bookingTime": "2026-10-02T18:00:00",
-  "studentId": 1,
-  "lessonId": 1
-}
-```
-
-### Response
-
-**201 Created**
-
-```json
-{
-  "id": 1,
-  "bookingTime": "2026-10-02T18:00:00",
-  "studentId": 1,
-  "lessonId": 1
-}
-```
-
-### Validation
-
-- `bookingTime` is required
-- `studentId` must be greater than 0
-- `lessonId` must be greater than 0
-
-Invalid input returns:
-
-```text
-400 Bad Request
-```
-
-If the lesson is already booked:
-
-```text
-400 Bad Request
-```
-
-```json
-{
-  "status": 400,
-  "message": "Lesson is already booked"
-}
-```
-
-If the student does not exist:
-
-```text
-404 Not Found
-```
-
-```json
-{
-  "status": 404,
-  "message": "Student not found"
-}
-```
-
-If the lesson does not exist:
-
-```text
-404 Not Found
-```
-
-```json
-{
-  "status": 404,
-  "message": "Lesson not found"
-}
-```
-
----
-
-## Update Booking
-
-Updates an existing booking.
-
-### Request
-
-```text
-PUT /api/bookings/{id}
-```
-
-Example:
-
-```text
-PUT /api/bookings/1
-```
-
-**Content-Type: application/json**
-
-```json
-{
-  "bookingTime": "2026-10-03T10:00:00",
-  "studentId": 1,
-  "lessonId": 1
-}
-```
-
-### Response
-
-**200 OK**
-
-```json
-{
-  "id": 1,
-  "bookingTime": "2026-10-03T10:00:00",
-  "studentId": 1,
-  "lessonId": 1
-}
-```
-
-### Errors
-
-**400 Bad Request**
-
-Returned if the ID or request body is invalid.
-
-**404 Not Found**
-
-Returned if the booking, student, or lesson does not exist.
-
-Example:
-
-```json
-{
-  "status": 404,
-  "message": "Booking not found"
-}
-```
-
----
-
-## Delete Booking
-
-Deletes a booking from the database.
-
-### Request
-
-```text
-DELETE /api/bookings/{id}
-```
-
-Example:
-
-```text
-DELETE /api/bookings/1
-```
-
-### Response
-
-**204 No Content**
-
-No response body is returned.
-
-### Errors
-
-**400 Bad Request**
-
-Returned if the ID is invalid.
-
-**404 Not Found**
-
-Returned if the booking does not exist.
-
-```json
-{
-  "status": 404,
-  "message": "Booking not found"
-}
-```
-
----
-
-## Booking JSON Format
-
-### Request DTO
-
-```json
-{
-  "bookingTime": "2026-10-02T18:00:00",
-  "studentId": 1,
-  "lessonId": 1
-}
-```
-
-### Response DTO
-
-```json
-{
-  "id": 1,
-  "bookingTime": "2026-10-02T18:00:00",
-  "studentId": 1,
-  "lessonId": 1
-}
-```
-
----
-
-# JWT Authentication
-
-JWT authentication is used to protect booking creation in DriveApp.
-
-## Student Login
-
-Students can log in using their email and password.
-
-Passwords are securely hashed using BCrypt.
-
-### Request
-
-```text
+```http
 POST /api/students/login
+Content-Type: application/json
 ```
-
-**Content-Type: application/json**
 
 ```json
 {
   "email": "student@example.com",
-  "password": "Test1234"
+  "password": "your-password"
 }
 ```
 
-### Response
-
-**200 OK**
+**Response – 200 OK:**
 
 ```json
 {
@@ -1185,82 +195,258 @@ POST /api/students/login
 }
 ```
 
-### Errors
+The token must be included in the header when accessing protected endpoints:
 
-**401 Unauthorized**
+```http
+Authorization: Bearer <token>
+```
 
-Returned if the email or password is incorrect.
+An incorrect email or password returns `401 Unauthorized`.
 
----
+### 2. View Available Lessons
 
-## Protected Booking
+Students can see which driving lessons are available before making a booking.
 
-Creating a booking requires a valid JWT.
+**Request:**
 
-### Request
+```http
+GET /api/lessons/available
+Authorization: Bearer <token>
+```
 
-```text
+**Response – 200 OK**
+
+The API returns a JSON list of lessons that have not been booked yet.
+
+### 3. Book a Driving Lesson
+
+A student can book an available driving lesson by sending a booking request.
+
+**Request:**
+
+```http
 POST /api/bookings
+Authorization: Bearer <token>
+Content-Type: application/json
 ```
-
-**Authorization: Bearer &lt;token&gt;**
-
-### Response
-
-**201 Created**
-
-The booking is created if the JWT is valid and the lesson is available.
-
-### Errors
-
-**401 Unauthorized**
-
-Returned if the JWT is missing, invalid or expired.
-
----
-
-## Security Implementation
-
-- BCrypt is used to hash and verify student passwords.
-- `JWTToken.java` generates and validates JWTs.
-- `Filter.java` checks JWTs before booking creation.
-- `JWT_SECRET` is stored as an environment variable.
-- Authentication is tested using JUnit and REST Assured.
-
----
-
-# Error Response Format
-
-Errors are returned as JSON with a status code and message.
-
-Example:
 
 ```json
 {
-  "status": 404,
-  "message": "Student not found"
+  "bookingTime": "2026-11-10T10:00:00",
+  "studentId": 1,
+  "lessonId": 2
 }
 ```
 
-An unexpected server-side error returns:
+**Response – 201 Created:**
 
 ```json
 {
-  "status": 500,
-  "message": "Internal server error"
+  "id": 1,
+  "bookingTime": "2026-11-10T10:00:00",
+  "studentId": 1,
+  "lessonId": 2
 }
 ```
 
----
+Before saving the booking, the API checks that the student and lesson exist and that the lesson is not already booked.
 
-# Status Codes
+If the lesson has already been booked, the API returns `400 Bad Request`.
 
-| Status Code | Meaning |
+### 4. Ask the AI Driving Assistant
+
+Students can ask the AI assistant questions about driving theory, traffic rules, and road safety.
+
+**Request:**
+
+```http
+POST /api/ai/driving-advice
+Authorization: Bearer <token>
+Content-Type: application/json
+```
+
+```json
+{
+  "question": "What does a triangular traffic sign mean?"
+}
+```
+
+**Response – 200 OK:**
+
+```json
+{
+  "answer": "A triangular traffic sign is usually a warning sign that alerts drivers to possible dangers ahead."
+}
+```
+
+The question is sent to Google Gemini through our `DrivingAiService`, and the generated answer is returned as JSON.
+
+## HTTP Status Codes
+
+We use HTTP status codes to indicate whether a request was successful or if something went wrong.
+
+| Status Code | How We Use It in DriveApp |
 |---|---|
-| `200 OK` | Request completed successfully |
-| `201 Created` | A new resource was created successfully |
-| `204 No Content` | A resource was deleted successfully |
-| `400 Bad Request` | Request data or a path parameter was invalid |
-| `401 Unauthorized` | Authentication is missing or invalid |
-| `404 Not Found` | Requested resource could not be found |
-| `500 Internal Server Error` | An unexpected server-side error occurred |
+| `200 OK` | Returned when data is retrieved or updated successfully, or when a user logs in. |
+| `201 Created` | Returned when a student, instructor, lesson, or booking is created. |
+| `204 No Content` | Returned when a student, instructor, lesson, or booking is deleted. |
+| `400 Bad Request` | Returned when a request contains invalid data, an AI question is empty, or a lesson is already booked. |
+| `401 Unauthorized` | Returned when login credentials are incorrect or a required JWT is missing or invalid. |
+| `403 Forbidden` | Returned when a user does not have permission to perform an action or access another student's information. |
+| `404 Not Found` | Returned when a requested student, instructor, lesson, or booking does not exist. |
+| `500 Internal Server Error` | Returned when an unexpected error occurs in the application. |
+
+## User Stories
+
+We created 10 user stories to describe the main features of DriveApp from the perspective of students and instructors.
+
+The user stories helped us plann the project and decide which features to focus on. We prioriitized the most important functionality, such as registration, login, driving lessons, and bookings, while also including profile management and our AI driving assistant.
+
+| ID | User story | Priority |
+|---|---|---|
+| US-01 | As a student, I want to register an account, so I can access the driving school's services. | High |
+| US-02 | As a student or instructor, I want to log in securely, so I can access protected features of the application. | High |
+| US-03 | As a student, I want to view available driving lessons, so I can find a lesson that fits my schedule. | High |
+| US-04 | As a student, I want to book a driving lesson, so I can reserve my preferred time. | High |
+| US-05 | As a student, I want to view and update my own profile securely, so I can keep my personal information accurate and protected. | Medium |
+| US-06 | As an instructor, I want to view, update and delete student information, so I can keep student records organized and up to date. | High |
+| US-07 | As an instructor, I want to create, update and delete driving lessons, so I can organize the driving school's lessons. | High |
+| US-08 | As an instructor, I want to view and manage student bookings, so I can keep track of scheduled driving lessons. | Medium |
+| US-09 | As an instructor, I want to view and manage instructor information, so I can keep instructor records up to date. | Medium |
+| US-10 | As a student, I want to ask an AI assistant questions about driving theory and traffic rules, so I can receive relevant driving advice. | Medium |
+
+---
+
+# Development notes
+
+## Run Locally
+
+To run DriveApp locally, we need Java 17, Maven, and a running PostgreSQL database.
+
+### Requirements
+
+- JDK 17
+- Maven
+- PostgreSQL
+- IntelliJ IDEA (optional)
+
+### Setup
+
+**1. Clone the repository**
+
+```bash
+git clone https://github.com/Musa-909/DriveApp.git
+cd DriveApp
+```
+
+**2. Configure the database**
+
+We use two separate PostgreSQL databases in DriveApp:
+
+- **Test Database:** Used for our automated REST Assured tests in GitHub Actions (`driveapp_test`).
+- **Production Database:** Used by our deployed application on `driveapp.website`.
+
+This keeps our test data separate from the production data.
+
+When running the application locally, PostgreSQL must be running and a database must be available.
+
+Create `src/main/resources/config.properties` with the following settings:
+
+```properties
+DB_NAME=driveapp_test
+DB_USERNAME=postgres
+DB_PASSWORD=your-local-password
+```
+
+These are example values. The database name, username, and password must match the PostgreSQL setup on your computer. The local application does not automatically connect to the test database running in GitHub Actions.
+
+**3. Set environment variables**
+
+For local execution, we use:
+
+- `JWT_SECRET` – Required for JWT authentication.
+- `GEMINI_API_KEY` – Required when using the AI driving assistant.
+
+The local database connection is configured through `config.properties`, so `DB_NAME`, `DB_USERNAME`, and `DB_PASSWORD` do not need to be set separately as environment variables.
+
+Do not set `DEPLOYED` when running locally, because that makes the application use the deployed database configuration instead.
+
+**4. Run the application**
+
+We can start DriveApp by running the `main()` method in `Main.java` through IntelliJ IDEA. This calls `Application.main()`, which starts our Javalin REST API.
+
+Alternatively, we can build and run the application through the terminal:
+
+```bash
+mvn clean package -DskipTests
+java -jar target/app.jar
+```
+
+The application runs on:
+
+`http://localhost:7070`
+
+We can check if the REST API is running by opening:
+
+`http://localhost:7070/api/health`
+
+## Tests
+
+We use **JUnit and REST Assured** to test DriveApp and make sure our backend works as expected.
+
+Our tests cover different parts of the application:
+
+- **API Tests:** Testing endpoints for students, instructors, lessons, bookings, and our AI assistant.
+- **DAO Tests:** Testing database operations such as creating, retrieving, updating, and deleting data.
+- **Security Tests:** Testing JWT authentication and BCrypt password hashing.
+- **AI Tests:** Testing our `DrivingAiService` and how it handles responses from Google Gemini.
+
+We use a separate PostgreSQL test database called `driveapp_test` in GitHub Actions. The workflow starts the database, creates test accounts, and runs our tests automatically when we push changes to `main`.
+
+This allows us to test our application without affecting the production database.
+
+To run the tests manually:
+
+```bash
+mvn test
+```
+
+When running API tests locally, the test database, running application, and required environment variables must be configured.
+
+## CI/CD and Deployment
+
+We use GitHub Actions, Docker, Docker Hub, and DigitalOcean to build, test, and deploy DriveApp.
+
+### CI/CD Pipeline
+
+When we push changes to `main`, GitHub Actions:
+
+1. Builds our Java application using Maven.
+2. Starts a PostgreSQL test database and runs our automated tests.
+3. Builds and pushes our Docker image to Docker Hub (`amaanm3/driveapp:latest`) if the tests pass.
+
+### Deployment
+
+Our backend runs in Docker on a DigitalOcean server. Watchtower automatically checks Docker Hub for new images and updates the application.
+
+We use **DanDomain** for our domain name and DNS settings, connecting `driveapp.website` to our server. **Caddy** provides HTTPS for secure access to the REST API.
+
+**Live API:** https://driveapp.website
+
+**Health Check:** https://driveapp.website/api/health
+
+Passwords, database credentials, and API keys are configured through environment variables and GitHub Secrets.
+
+## Lessons Learned
+
+During the development of DriveApp, we gained experience with different backend technologies and working together as a team.
+
+- **Backend Development:** Structuring our API with Javalin, controllers, DTOs, and DAOs.
+- **Database:** Working with PostgreSQL, Hibernate/JPA, and entity relationships.
+- **Security:** Implementing JWT authentication, BCrypt, and role-based authorization.
+- **Testing:** Writing API and database tests using JUnit and REST Assured.
+- **Deployment:** Setting up CI/CD with GitHub Actions, Docker, and DigitalOcean.
+- **AI Integration:** Connecting our backend to Google Gemini.
+- **Teamwork:** Collaborating through GitHub and solving problems together.
+
+Overall, the project helped us understand how to build, test, and deploy a complete backend application.
