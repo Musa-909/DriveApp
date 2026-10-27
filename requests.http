@@ -8,3 +8,21 @@ Content-Type: application/json
   "password": "Test1234!",
   "phoneNumber": "12345678"
 }
+###
+GET https://driveapp.website/api/students
+Accept: application/json
+
+### Login som kørelærer
+POST https://driveapp.website/api/instructors/login
+Content-Type: application/json
+
+{
+  "email": "musa@gmail.com",
+  "password": "Musa123"
+}
+
+
+### Hent alle elever
+GET https://driveapp.website/api/students
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJEcml2ZUFwcCIsInN1YiI6IjIiLCJyb2xlIjoiSU5TVFJVQ1RPUiIsImlhdCI6MTc5MjkzNTUxMCwiZXhwIjoxNzkyOTM2MDEwfQ.xqsFI_ehn9_ymIyJysGGfO10ILGK3vCIS_6z4e1XB6Q
+Accept: application/json
