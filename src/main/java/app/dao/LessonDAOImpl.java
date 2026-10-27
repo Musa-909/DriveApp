@@ -36,6 +36,7 @@ public class LessonDAOImpl implements LessonDAO {
         }
     }
 
+    @Override
     public List<Lesson> getAvailable() {
         try (EntityManager em = emf.createEntityManager()) {
             return em.createQuery(
