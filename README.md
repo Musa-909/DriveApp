@@ -1,4 +1,4 @@
-## Vision
+### Vision
 
 Our goal with DriveApp was to create a backend system for a driving school that makes it easier to manage students, instructors, driving lessons, and bookings.
 
@@ -10,7 +10,7 @@ We developed DriveApp as our third-semester backend project to use what we have 
 
 ---
 
-## Project Links
+### Project Links
 
 | Resource | Description | Link |
 |---|---|---|
@@ -21,7 +21,7 @@ We developed DriveApp as our third-semester backend project to use what we have 
 
 ---
 
-## Group Project
+### Group Project
 
 DriveApp is a collaborative third-semester backend examination project developed by **Amaan Mahomed** and **Musa Sayed**. We worked together on designing, implementing, testing, documenting, and deploying the application.
 
@@ -32,7 +32,7 @@ DriveApp is a collaborative third-semester backend examination project developed
 
 ---
 
-## Relevant Course Topics
+### Relevant Course Topics
 
 During our third semester, we have worked with different backend topics that we have used in DriveApp.
 
@@ -53,9 +53,9 @@ These topics helped us apply what we learned during the semester to a working ba
 
 ---
 
-## Architecture
+### Architecture
 
-### System Overview
+#### System Overview
 
 DriveApp is built as a layered Java backend using Javalin, Hibernate/JPA, and PostgreSQL. We have separated the application into different layers to make the code easier to understand, maintain, and work with.
 
@@ -87,7 +87,7 @@ The application includes an AI driving assistant, where students can ask questio
 
 ---
 
-## Architecture Diagram
+### Architecture Diagram
 
 The architecture diagram shows how the different parts of DriveApp work together. It gives an overview of how HTTP requests are handled, how data is stored in the database, and how our AI assistant connects to Google Gemini.
 
@@ -97,25 +97,34 @@ We use Javalin to handle HTTP requests, controllers to manage application logic,
 
 JWT authentication protects our endpoints. Registration, login, and health checks are public, while the other endpoints require a valid token. Our AI assistant is handled through `DrivingAiService`, which communicates with the Google Gemini API.
 
-## Key Design Decisions
-
-**Layered Architecture and DTOs.** 
-We separated our code into routes, controllers, and DAO classes to keep the project organized. We also use DTOs to control what data is sent and received through our API, so sensitive information like passwords is not returned.
-
-**Authentication and Roles.** 
-We use BCrypt to hash passwords and JWT for authentication. Students and instructors have different roles, which determine what they are allowed to access. Students can only manage their own profile, while instructors have access to administrative features.
-
-**Bookings and Availability.** 
-Students can book available driving lessons. Before creating a booking, we check that the student and lesson exist and that the lesson has not already been booked. Available lessons are found by checking which lessons have no bookings.
-
-**AI Integration.**
-We integrated Google Gemini through our `DrivingAiService` class. We use Java HttpClient and `CompletableFuture` to send questions to Gemini and receive answers. The API waits for the AI response before returning it to the user.
-
-**Error Handling and Logging.** We use HTTP status codes, validation, and JSON error messages to handle invalid requests. We also use logging to keep track of requests and unexpected errors.
 
 ---
 
-## Data Model
+### Key Design Decisions
+
+#### Layered Architecture and DTOs
+
+We separated our code into routes, controllers, and DAO classes to keep the project organized. We also use DTOs to control what data is sent and received through our API, so sensitive information like passwords is not returned.
+
+#### Authentication and Roles
+
+We use BCrypt to hash passwords and JWT for authentication. Students and instructors have different roles, which determine what they are allowed to access. Students can only manage their own profile, while instructors have access to administrative features.
+
+#### Bookings and Availability
+
+Students can book available driving lessons. Before creating a booking, we check that the student and lesson exist and that the lesson has not already been booked. Available lessons are found by checking which lessons have no bookings.
+
+#### AI Integration
+
+We integrated Google Gemini through our `DrivingAiService` class. We use Java HttpClient and `CompletableFuture` to send questions to Gemini and receive answers. The API waits for the AI response before returning it to the user.
+
+#### Error Handling and Logging
+
+We use HTTP status codes, validation, and JSON error messages to handle invalid requests. We also use logging to keep track of requests and unexpected errors.
+
+---
+
+### Data Model
 
 ### Entity Relationship Diagram (ERD)
 
@@ -140,7 +149,7 @@ The domain model shows the main concepts in our driving school system and how th
 
 ---
 
-# API Documentation
+### API Documentation
 
 DriveApp provides a REST API for managing students, instructors, driving lessons, and bookings. The API also includes an AI driving assistant that can answer questions about driving theory and traffic rules.
 
@@ -148,7 +157,7 @@ DriveApp provides a REST API for managing students, instructors, driving lessons
 
 **Production URL:** `https://driveapp.website`
 
-## Endpoint Overview
+#### Endpoint Overview
 
 | Area | Main Endpoints | Access |
 |---|---|---|
@@ -164,11 +173,11 @@ We use JWT authentication to protect our endpoints. Students can view and update
 
 Students can also view available driving lessons and create bookings for themselves. An instructor account is required to create, update, or delete driving lessons.
 
-## Example Endpoints
+#### Example Endpoints
 
 Below are some examples of how we use the main endpoints in DriveApp.
 
-### 1. Student Login
+#### 1. Student Login
 
 Students can log in using their email and password. If the login is successful, the API returns a JWT token.
 
@@ -203,7 +212,7 @@ Authorization: Bearer <token>
 
 An incorrect email or password returns `401 Unauthorized`.
 
-### 2. View Available Lessons
+#### 2. View Available Lessons
 
 Students can see which driving lessons are available before making a booking.
 
@@ -218,7 +227,7 @@ Authorization: Bearer <token>
 
 The API returns a JSON list of lessons that have not been booked yet.
 
-### 3. Book a Driving Lesson
+#### 3. Book a Driving Lesson
 
 A student can book an available driving lesson by sending a booking request.
 
@@ -253,7 +262,7 @@ Before saving the booking, the API checks that the student and lesson exist and 
 
 If the lesson has already been booked, the API returns `400 Bad Request`.
 
-### 4. Ask the AI Driving Assistant
+##### 4. Ask the AI Driving Assistant
 
 Students can ask the AI assistant questions about driving theory, traffic rules, and road safety.
 
@@ -281,7 +290,9 @@ Content-Type: application/json
 
 The question is sent to Google Gemini through our `DrivingAiService`, and the generated answer is returned as JSON.
 
-## HTTP Status Codes
+---
+
+### HTTP Status Codes
 
 We use HTTP status codes to indicate whether a request was successful or if something went wrong.
 
@@ -296,41 +307,43 @@ We use HTTP status codes to indicate whether a request was successful or if some
 | `404 Not Found` | Returned when a requested student, instructor, lesson, or booking does not exist. |
 | `500 Internal Server Error` | Returned when an unexpected error occurs in the application. |
 
-## User Stories
+---
+
+### User Stories
 
 We created 10 user stories to describe the main features of DriveApp from the perspective of students and instructors.
 
-The user stories helped us plann the project and decide which features to focus on. We prioriitized the most important functionality, such as registration, login, driving lessons, and bookings, while also including profile management and our AI driving assistant.
+The user stories helped us plan the project and decide which features to focus on. We prioritized the most important functionality, such as registration, login, driving lessons, and bookings, while also including profile management and our AI driving assistant.
 
-| ID | User story | Priority |
-|---|---|---|
-| US-01 | As a student, I want to register an account, so I can access the driving school's services. | High |
-| US-02 | As a student or instructor, I want to log in securely, so I can access protected features of the application. | High |
-| US-03 | As a student, I want to view available driving lessons, so I can find a lesson that fits my schedule. | High |
-| US-04 | As a student, I want to book a driving lesson, so I can reserve my preferred time. | High |
-| US-05 | As a student, I want to view and update my own profile securely, so I can keep my personal information accurate and protected. | Medium |
-| US-06 | As an instructor, I want to view, update and delete student information, so I can keep student records organized and up to date. | High |
-| US-07 | As an instructor, I want to create, update and delete driving lessons, so I can organize the driving school's lessons. | High |
-| US-08 | As an instructor, I want to view and manage student bookings, so I can keep track of scheduled driving lessons. | Medium |
-| US-09 | As an instructor, I want to view and manage instructor information, so I can keep instructor records up to date. | Medium |
-| US-10 | As a student, I want to ask an AI assistant questions about driving theory and traffic rules, so I can receive relevant driving advice. | Medium |
+| ID | User Story |
+|---|---|
+| US-01 | As a student, I want to register an account, so I can access the driving school's services. |
+| US-02 | As a student or instructor, I want to log in securely, so I can access protected features of the application. |
+| US-03 | As a student, I want to view available driving lessons, so I can find a lesson that fits my schedule. |
+| US-04 | As a student, I want to book a driving lesson, so I can reserve my preferred time. |
+| US-05 | As a student, I want to view and update my own profile securely, so I can keep my personal information accurate and protected. |
+| US-06 | As an instructor, I want to view, update and delete student information, so I can keep student records organized and up to date. |
+| US-07 | As an instructor, I want to create, update and delete driving lessons, so I can organize the driving school's lessons. |
+| US-08 | As an instructor, I want to view and manage student bookings, so I can keep track of scheduled driving lessons. |
+| US-09 | As an instructor, I want to view and manage instructor information, so I can keep instructor records up to date. |
+| US-10 | As a student, I want to ask an AI assistant questions about driving theory and traffic rules, so I can receive relevant driving advice. |
 
 ---
 
-# Development notes
+### Development Notes
 
-## Run Locally
+#### Run Locally
 
 To run DriveApp locally, we need Java 17, Maven, and a running PostgreSQL database.
 
-### Requirements
+##### Requirements
 
 - JDK 17
 - Maven
 - PostgreSQL
 - IntelliJ IDEA (optional)
 
-### Setup
+##### Setup
 
 **1. Clone the repository**
 
@@ -390,11 +403,13 @@ We can check if the REST API is running by opening:
 
 `http://localhost:7070/api/health`
 
-### Creating the First Instructor
+##### Creating the First Instructor
 
 Creating an instructor through `POST /api/instructors` requires an existing instructor account with a valid JWT token. Therefore, the first instructor must be added directly to the database with a BCrypt-hashed password. Once the account has been created, the instructor can log in through `POST /api/instructors/login` and create additional instructor accounts through the API.
 
-## Tests
+---
+
+### Tests
 
 We use **JUnit and REST Assured** to test DriveApp and verify that our backend works as expected.
 
@@ -405,7 +420,7 @@ Our tests cover different parts of the application:
 - **Security Tests:** Testing JWT authentication, BCrypt password hashing, and role-based authorization.
 - **AI Tests:** Testing our `DrivingAiService` and how it handles responses from Google Gemini.
 
-### Automated Testing with GitHub Actions
+#### Automated Testing with GitHub Actions
 
 We use GitHub Actions to automatically build and test DriveApp whenever changes are pushed to the `main` branch. The workflow can also be started manually.
 
@@ -421,7 +436,7 @@ Our testing workflow:
 
 The test database is separate from our production database, so automated tests do not affect real application data.
 
-### Running Tests Locally
+#### Running Tests Locally
 
 To run the tests locally, PostgreSQL must be running with a configured test database.
 
@@ -436,17 +451,22 @@ mvn test
 This allows us to test our application locally before pushing changes to GitHub.
 
 By using automated testing in our CI/CD pipeline, we can verify that our backend works correctly before a new Docker image is pushed to Docker Hub and deployed through Watchtower.
-## CI/CD and Deployment
+
+---
+
+### CI/CD and Deployment
 
 We use GitHub Actions, Docker, Docker Hub, and DigitalOcean to build, test, and deploy DriveApp.
 
-### CI/CD Pipeline
+#### CI/CD Pipeline
 
 When we push changes to `main`, GitHub Actions:
 
 1. Builds our Java application using Maven.
 2. Starts a PostgreSQL test database and runs our automated tests.
 3. Builds and pushes our Docker image to Docker Hub (`amaanm3/driveapp:latest`) if the tests pass.
+
+---
 
 ### Deployment
 
@@ -460,7 +480,9 @@ We use **DanDomain** for our domain name and DNS settings, connecting `driveapp.
 
 Passwords, database credentials, and API keys are configured through environment variables and GitHub Secrets.
 
-## Lessons Learned
+---
+
+### Lessons Learned
 
 During the development of DriveApp, we gained experience with different backend technologies and working together as a team.
 
