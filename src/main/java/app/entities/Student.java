@@ -30,7 +30,7 @@ public class Student {
     private String phoneNumber;
 
     @ToString.Exclude
-    @Column(nullable = true)
+    @Column
     private String password;
 
     @Enumerated(EnumType.STRING)

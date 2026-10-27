@@ -13,66 +13,57 @@ public class StudentDAOImpl implements StudentDAO {
 
     @Override
     public Student create(Student student) {
-        EntityManager em = emf.createEntityManager();
-        em.getTransaction().begin();
-        em.persist(student);
-        em.getTransaction().commit();
-        em.close();
-        return student;
+        try (EntityManager em = emf.createEntityManager()) {
+            em.getTransaction().begin();
+            em.persist(student);
+            em.getTransaction().commit();
+            return student;
+        }
     }
 
     @Override
     public Student getById(int id) {
-        EntityManager em = emf.createEntityManager();
-        Student foundStudent = em.find(Student.class, id);
-        em.close();
-        return foundStudent;
+        try (EntityManager em = emf.createEntityManager()) {
+            return em.find(Student.class, id);
+        }
     }
 
     @Override
     public List<Student> getAll() {
-        EntityManager em = emf.createEntityManager();
-
-        List<Student> students = em
-                .createQuery("SELECT s FROM Student s", Student.class)
-                .getResultList();
-
-        em.close();
-        return students;
+        try (EntityManager em = emf.createEntityManager()) {
+            return em.createQuery("SELECT s FROM Student s", Student.class)
+                    .getResultList();
+        }
     }
-
 
     @Override
     public Student update(Student student) {
-        EntityManager em = emf.createEntityManager();
-        em.getTransaction().begin();
-        Student updatedStudent = em.merge(student);
-        em.getTransaction().commit();
-        em.close();
-        return updatedStudent;
+        try (EntityManager em = emf.createEntityManager()) {
+            em.getTransaction().begin();
+            Student updatedStudent = em.merge(student);
+            em.getTransaction().commit();
+            return updatedStudent;
+        }
     }
 
     @Override
     public void delete(int id) {
-        EntityManager em = emf.createEntityManager();
-        em.getTransaction().begin();
+        try (EntityManager em = emf.createEntityManager()) {
+            em.getTransaction().begin();
 
-        Student student = em.find(Student.class, id);
+            Student student = em.find(Student.class, id);
 
-        if (student != null) {
-            em.remove(student);
+            if (student != null) {
+                em.remove(student);
+            }
+
+            em.getTransaction().commit();
         }
-
-        em.getTransaction().commit();
-        em.close();
     }
-
 
     @Override
     public Student getByEmail(String email) {
-        EntityManager em = emf.createEntityManager();
-
-        try {
+        try (EntityManager em = emf.createEntityManager()) {
             return em.createQuery(
                             "SELECT s FROM Student s WHERE s.email = :email",
                             Student.class
@@ -81,10 +72,6 @@ public class StudentDAOImpl implements StudentDAO {
                     .getResultStream()
                     .findFirst()
                     .orElse(null);
-
-        } finally {
-            em.close();
         }
     }
-
 }

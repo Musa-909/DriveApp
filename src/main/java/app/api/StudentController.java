@@ -17,6 +17,7 @@ import java.util.Map;
 
 @RequiredArgsConstructor
 public class StudentController {
+
     private final StudentDAOImpl studentDAO;
     private final Filter filter = new Filter();
 
@@ -111,29 +112,6 @@ public class StudentController {
         ctx.status(204);
     }
 
-    private int getId(Context ctx) {
-        return ctx.pathParamAsClass("id", Integer.class)
-                .check(id -> id > 0, "Id must be greater than 0")
-                .get();
-    }
-
-    private StudentRequestDTO getValidatedRequest(Context ctx) {
-        return ctx.bodyValidator(StudentRequestDTO.class)
-                .check(request -> request.name() != null && !request.name().isBlank(), "Name is required")
-                .check(request -> request.email() != null && !request.email().isBlank(), "Email is required")
-                .check(request -> request.phoneNumber() != null && !request.phoneNumber().isBlank(), "Phone number is required")
-                .get();
-    }
-
-    private StudentResponseDTO toResponse(Student student) {
-        return new StudentResponseDTO(
-                student.getId(),
-                student.getName(),
-                student.getEmail(),
-                student.getPhoneNumber()
-        );
-    }
-
     public void login(Context ctx) {
         LoginRequestDTO request = ctx.bodyAsClass(LoginRequestDTO.class);
 
@@ -152,5 +130,29 @@ public class StudentController {
 
         ctx.status(200);
         ctx.json(Map.of("message", "Login successful", "token", token));
+    }
+
+    private int getId(Context ctx) {
+        return ctx.pathParamAsClass("id", Integer.class)
+                .check(id -> id > 0, "Id must be greater than 0")
+                .get();
+    }
+
+    private StudentRequestDTO getValidatedRequest(Context ctx) {
+        return ctx.bodyValidator(StudentRequestDTO.class)
+                .check(request -> request.name() != null && !request.name().isBlank(), "Name is required")
+                .check(request -> request.email() != null && !request.email().isBlank(), "Email is required")
+                .check(request -> request.phoneNumber() != null && !request.phoneNumber().isBlank(), "Phone number is required")
+                .check(request -> request.password() != null && !request.password().isBlank(), "Password is required")
+                .get();
+    }
+
+    private StudentResponseDTO toResponse(Student student) {
+        return new StudentResponseDTO(
+                student.getId(),
+                student.getName(),
+                student.getEmail(),
+                student.getPhoneNumber()
+        );
     }
 }

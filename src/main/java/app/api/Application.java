@@ -78,7 +78,7 @@ public class Application {
 
             if (request.question() == null || request.question().isBlank()) {
                 ctx.status(400);
-                ctx.json(Map.of("error", "Question is required"));
+                ctx.json(new ErrorResponse(400, "Question is required"));
                 return;
             }
 

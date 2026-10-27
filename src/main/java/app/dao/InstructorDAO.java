@@ -12,6 +12,8 @@ public interface InstructorDAO {
 
     Instructor update(Instructor instructor);
 
+    Instructor getByEmail(String email);
+
     void delete(int id);
 
     List<Instructor> getAll();

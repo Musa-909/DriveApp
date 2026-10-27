@@ -10,9 +10,6 @@ import java.util.Date;
 
 public class JWTToken {
 
-    public static String generateToken(int studentId) {
-        return generateToken(studentId, Role.STUDENT);
-    }
 
     public static String generateToken(int userId, Role role) {
 

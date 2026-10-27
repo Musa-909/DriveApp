@@ -12,6 +12,8 @@ public interface LessonDAO {
 
     List<Lesson> getAll();
 
+    List<Lesson> getAvailable();
+
     Lesson update(Lesson lesson);
 
     void delete(int id);

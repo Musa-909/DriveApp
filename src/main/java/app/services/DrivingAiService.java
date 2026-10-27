@@ -75,8 +75,10 @@ public class DrivingAiService {
                         );
                     }
 
-                    try {GeminiResponse geminiResponse = objectMapper.readValue(response.body(), GeminiResponse.class
-                                );
+                    try {GeminiResponse geminiResponse = objectMapper.readValue(
+                            response.body(),
+                            GeminiResponse.class
+                    );
 
                         return geminiResponse
                                 .candidates()
