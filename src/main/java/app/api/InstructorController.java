@@ -52,6 +52,12 @@ public class InstructorController {
     public void create(Context ctx) {
         InstructorRequestDTO request = getValidatedRequest(ctx);
 
+        if (request.password() == null || request.password().isBlank()) {
+            ctx.status(400);
+            ctx.json(new ErrorResponse(400, "Password is required"));
+            return;
+        }
+
         String hashedPassword = BCrypt.hashpw(
                 request.password(),
                 BCrypt.gensalt()
@@ -143,7 +149,6 @@ public class InstructorController {
                 .check(request -> request.name() != null && !request.name().isBlank(), "Name is required")
                 .check(request -> request.email() != null && !request.email().isBlank(), "Email is required")
                 .check(request -> request.phoneNumber() != null && !request.phoneNumber().isBlank(), "Phone number is required")
-                .check(request -> request.password() != null && !request.password().isBlank(), "Password is required")
                 .get();
     }
 
