@@ -28,7 +28,7 @@ DriveApp is a collaborative third-semester backend examination project developed
 | Team Member | Project Contribution | GitHub | Portfolio |
 |---|---|---|---|
 | **Amaan Mahomed** | Backend development, testing, documentation, and deployment | [@AmaanM3](https://github.com/AmaanM3) | [View Portfolio](https://amaanm3.github.io/portfolio2026/) |
-| **Musa Sayed** | Backend development, testing, documentation, and deployment | [@Musa-909](https://github.com/Musa-909) | Coming soon |
+| **Musa Sayed** | Backend development, testing, documentation, and deployment | [@Musa-909](https://github.com/Musa-909) | [View Portfolio](https://musa-909.github.io/portfolio2026/exam-portfolio/) |
 
 ---
 
