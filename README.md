@@ -354,24 +354,25 @@ cd DriveApp
 
 **2. Configure the database**
 
-We use two separate PostgreSQL databases in DriveApp:
+DriveApp uses separate database configurations for development, automated testing, and production:
 
-- **Test Database:** Used for our automated REST Assured tests in GitHub Actions (`driveapp_test`).
-- **Production Database:** Used by our deployed application on `driveapp.website`.
+- **Local development:** A local PostgreSQL database configured through `config.properties`.
+- **Automated DAO and API tests:** Temporary PostgreSQL 16 databases started automatically by Testcontainers in Docker.
+- **Production:** The deployed PostgreSQL database configured through environment variables.
 
-This keeps our test data separate from the production data.
+Automated tests are isolated from the local and production databases.
 
 When running the application locally, PostgreSQL must be running and a database must be available.
 
 Create `src/main/resources/config.properties` with the following settings:
 
 ```properties
-DB_NAME=driveapp_test
+DB_NAME=driveapp_dev
 DB_USERNAME=postgres
 DB_PASSWORD=your-local-password
 ```
 
-These are example values. The database name, username, and password must match the PostgreSQL setup on your computer. The local application does not automatically connect to the test database running in GitHub Actions.
+These are example values. The database name, username, and password must match the PostgreSQL setup on your computer. The local application does not connect to the temporary databases started by Testcontainers.
 
 **3. Set environment variables**
 
@@ -411,14 +412,16 @@ Creating an instructor through `POST /api/instructors` requires an existing inst
 
 ### Tests
 
-We use **JUnit and REST Assured** to test DriveApp and verify that our backend works as expected.
+We use **JUnit, REST Assured, and Testcontainers** to test DriveApp and verify that our backend works as expected.
 
 Our tests cover different parts of the application:
 
-- **API Tests:** Testing endpoints for students, instructors, lessons, bookings, and our AI assistant.
-- **DAO Tests:** Testing database operations such as creating, retrieving, updating, and deleting data.
+- **API Tests:** Testing endpoints for students, instructors, lessons, bookings, and our AI assistant. The tests start Javalin automatically on an available port and create their own test users.
+- **DAO Tests:** Testing database operations such as creating, retrieving, updating, and deleting data against temporary PostgreSQL databases.
 - **Security Tests:** Testing JWT authentication, BCrypt password hashing, and role-based authorization.
-- **AI Tests:** Testing our `DrivingAiService` and how it handles responses from Google Gemini.
+- **AI Tests:** `AiApiTest` uses a fake AI response to test the endpoint without calling Gemini. `DrivingAiServiceTest` calls the real Gemini API.
+
+`HibernateTestConfig` configures the container database, `DatabaseTest` starts and stops PostgreSQL, and `ApiTest` starts and stops Javalin for the standard API test classes. `AiApiTest` starts Javalin separately to inject its fake AI service.
 
 #### Automated Testing with GitHub Actions
 
@@ -426,27 +429,31 @@ We use GitHub Actions to automatically build and test DriveApp whenever changes 
 
 Our testing workflow:
 
-1. Starts a PostgreSQL 16 test database called `driveapp_test`.
-2. Sets up Java 17 and builds the application using Maven.
-3. Starts the DriveApp REST API on port `7070` and checks that the health endpoint responds.
-4. Creates test accounts for a student and an instructor.
-5. Runs the automated tests using `mvn test`.
-6. Stops the running API after testing.
-7. Builds and pushes the Docker image to Docker Hub if the previous steps succeed.
+1. Checks out the project and sets up Java 17.
+2. Runs `mvn clean test` with `JWT_SECRET` and `GEMINI_API_KEY` provided through GitHub Actions secrets.
+3. Testcontainers starts temporary PostgreSQL 16 databases, and the API tests start and stop their own Javalin servers and create test users.
+4. If the tests pass, Maven builds the JAR and GitHub Actions builds and pushes the Docker image to Docker Hub.
 
-The test database is separate from our production database, so automated tests do not affect real application data.
+The temporary test databases are separate from production, so automated tests do not affect real application data.
 
 #### Running Tests Locally
 
-To run the tests locally, PostgreSQL must be running with a configured test database.
+To run the tests locally, install Java 17, Maven, and Docker, and make sure Docker Desktop (or another compatible Docker daemon) is running. You do **not** need to start PostgreSQL, create test users, or start `Main.java` on port `7070`.
 
-The DriveApp API must also be running on port `7070`, and the required test accounts and environment variables must be configured.
+For the complete test suite, set these environment variables with your own values:
 
-Once the test environment is ready, run:
+```env
+JWT_SECRET=<test-jwt-secret>
+GEMINI_API_KEY=<gemini-api-key>
+```
+
+Then run:
 
 ```bash
 mvn test
 ```
+
+`JWT_SECRET` is required for JWT and API tests; `GEMINI_API_KEY` is only required by `DrivingAiServiceTest`, which calls the real Gemini API. DAO tests and `BcryptTest` need neither variable. Do not use production database credentials or the old `TEST_INSTRUCTOR_*` / `TEST_STUDENT_*` variables for these tests. Never commit real secrets to Git.
 
 This allows us to test our application locally before pushing changes to GitHub.
 
@@ -462,9 +469,9 @@ We use GitHub Actions, Docker, Docker Hub, and DigitalOcean to build, test, and 
 
 When we push changes to `main`, GitHub Actions:
 
-1. Builds our Java application using Maven.
-2. Starts a PostgreSQL test database and runs our automated tests.
-3. Builds and pushes our Docker image to Docker Hub (`amaanm3/driveapp:latest`) if the tests pass.
+1. Sets up Java 17 and runs `mvn clean test`.
+2. Lets Testcontainers create temporary PostgreSQL databases and the API tests launch Javalin automatically.
+3. Builds the JAR and pushes the Docker image to Docker Hub (`amaanm3/driveapp:latest`) only if the tests pass.
 
 ---
 
@@ -489,7 +496,7 @@ During the development of DriveApp, we gained experience with different backend 
 - **Backend Development:** Structuring our API with Javalin, controllers, DTOs, and DAOs.
 - **Database:** Working with PostgreSQL, Hibernate/JPA, and entity relationships.
 - **Security:** Implementing JWT authentication, BCrypt, and role-based authorization.
-- **Testing:** Writing API and database tests using JUnit and REST Assured.
+- **Testing:** Writing isolated API and database tests using JUnit, REST Assured, and Testcontainers.
 - **Deployment:** Setting up CI/CD with GitHub Actions, Docker, and DigitalOcean.
 - **AI Integration:** Connecting our backend to Google Gemini.
 - **Teamwork:** Collaborating through GitHub and solving problems together.
