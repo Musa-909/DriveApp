@@ -9,7 +9,15 @@ import java.util.List;
 
 public class StudentDAOImpl implements StudentDAO {
 
-    private EntityManagerFactory emf = HibernateConfig.getEntityManagerFactory();
+    private final EntityManagerFactory emf;
+
+    public StudentDAOImpl() {
+        this(HibernateConfig.getEntityManagerFactory());
+    }
+
+    public StudentDAOImpl(EntityManagerFactory emf) {
+        this.emf = emf;
+    }
 
     @Override
     public Student create(Student student) {

@@ -1,6 +1,11 @@
 package app.api;
 
+import app.dao.InstructorDAOImpl;
+import app.entities.Instructor;
+import app.testutils.ApiTest;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.mindrot.jbcrypt.BCrypt;
 
 import java.util.UUID;
 
@@ -8,41 +13,46 @@ import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
 
-public class InstructorApiTest {
+public class InstructorApiTest extends ApiTest {
 
-    // Login som eksisterende kørelærer og hent JWT-token
-    private String instructorToken() {
-        String email = System.getenv().getOrDefault(
-                "TEST_INSTRUCTOR_EMAIL", "musa@gmail.com"
+    private String testInstructorEmail;
+    private static final String TEST_PASSWORD = "Test1234";
+
+    @BeforeAll
+    void createInstructorForTests() {
+        testInstructorEmail = "instructor-admin-" + UUID.randomUUID() + "@test.dk";
+
+        Instructor instructor = new Instructor(
+                "Test Admin",
+                testInstructorEmail,
+                "22222222"
         );
 
-        String password = System.getenv("TEST_INSTRUCTOR_PASSWORD");
+        instructor.setPassword(BCrypt.hashpw(TEST_PASSWORD, BCrypt.gensalt()));
+        new InstructorDAOImpl(emf).create(instructor);
+    }
 
-        if (password == null || password.isBlank()) {
-            throw new IllegalStateException(
-                    "Set TEST_INSTRUCTOR_PASSWORD before running API tests"
-            );
-        }
-
+    // Log in as the test instructor and retrieve a JWT token
+    private String instructorToken() {
         String loginJson = """
                 {
                     "email": "%s",
                     "password": "%s"
                 }
-                """.formatted(email, password);
+                """.formatted(testInstructorEmail, TEST_PASSWORD);
 
         return given()
                 .contentType("application/json")
                 .body(loginJson)
                 .when()
-                .post("http://localhost:7070/api/instructors/login")
+                .post("/api/instructors/login")
                 .then()
                 .statusCode(200)
                 .extract()
                 .path("token");
     }
 
-    // Opret kørelærer med gyldig JWT
+    // Create an instructor with a valid JWT
     @Test
     void createInstructorTest() {
 
@@ -64,7 +74,7 @@ public class InstructorApiTest {
                 .auth().oauth2(token)
                 .body(instructorJson)
                 .when()
-                .post("http://localhost:7070/api/instructors")
+                .post("/api/instructors")
                 .then()
                 .log().ifValidationFails()
                 .statusCode(201)
@@ -74,7 +84,7 @@ public class InstructorApiTest {
                 .body("phoneNumber", equalTo("12345678"));
     }
 
-    // Opret kørelærer uden JWT
+    // Create an instructor without a JWT
     @Test
     void createInstructorWithoutJWTTest() {
 
@@ -91,12 +101,12 @@ public class InstructorApiTest {
                 .contentType("application/json")
                 .body(instructorJson)
                 .when()
-                .post("http://localhost:7070/api/instructors")
+                .post("/api/instructors")
                 .then()
                 .statusCode(401);
     }
 
-    // Opret kørelærer med ugyldig JWT
+    // Create an instructor with an invalid JWT
     @Test
     void createInstructorWithInvalidJWTTest() {
 
@@ -114,30 +124,30 @@ public class InstructorApiTest {
                 .header("Authorization", "Bearer invalid-token")
                 .body(instructorJson)
                 .when()
-                .post("http://localhost:7070/api/instructors")
+                .post("/api/instructors")
                 .then()
                 .statusCode(401);
     }
 
-    // Hent kørelærere uden JWT
+    // Get all instructors without a JWT
     @Test
     void getAllInstructorsWithoutJWTTest() {
 
         given()
                 .when()
-                .get("http://localhost:7070/api/instructors")
+                .get("/api/instructors")
                 .then()
                 .statusCode(401);
     }
 
-    // Hent kørelærere med ugyldig JWT
+    // Get all instructors with an invalid JWT
     @Test
     void getAllInstructorsWithInvalidJWTTest() {
 
         given()
                 .header("Authorization", "Bearer invalid-token")
                 .when()
-                .get("http://localhost:7070/api/instructors")
+                .get("/api/instructors")
                 .then()
                 .statusCode(401);
     }

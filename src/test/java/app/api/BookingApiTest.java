@@ -1,39 +1,50 @@
 package app.api;
 
+import app.dao.InstructorDAOImpl;
+import app.entities.Instructor;
+import app.testutils.ApiTest;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.mindrot.jbcrypt.BCrypt;
 
 import java.util.UUID;
 
 import static io.restassured.RestAssured.given;
 
-public class BookingApiTest {
+public class BookingApiTest extends ApiTest {
 
-    // Login som eksisterende kørelærer og hent JWT-token
-    private String instructorToken() {
-        String email = System.getenv().getOrDefault(
-                "TEST_INSTRUCTOR_EMAIL", "musa@gmail.com"
+    private String testInstructorEmail;
+    private static final String TEST_PASSWORD = "Test1234";
+
+    @BeforeAll
+    void createInstructorForTests() {
+        testInstructorEmail = "booking-admin-" + UUID.randomUUID() + "@test.dk";
+
+        Instructor instructor = new Instructor(
+                "Booking Test Admin",
+                testInstructorEmail,
+                "22222222"
         );
 
-        String password = System.getenv("TEST_INSTRUCTOR_PASSWORD");
+        instructor.setPassword(BCrypt.hashpw(TEST_PASSWORD, BCrypt.gensalt()));
+        new InstructorDAOImpl(emf).create(instructor);
+    }
 
-        if (password == null || password.isBlank()) {
-            throw new IllegalStateException(
-                    "Set TEST_INSTRUCTOR_PASSWORD before running API tests"
-            );
-        }
+    // Log in as an existing instructor and retrieve a JWT token
+    private String instructorToken() {
 
         String loginJson = """
                 {
                     "email": "%s",
                     "password": "%s"
                 }
-                """.formatted(email, password);
+                """.formatted(testInstructorEmail, TEST_PASSWORD);
 
         return given()
                 .contentType("application/json")
                 .body(loginJson)
                 .when()
-                .post("http://localhost:7070/api/instructors/login")
+                .post("/api/instructors/login")
                 .then()
                 .statusCode(200)
                 .extract()
@@ -55,7 +66,7 @@ public class BookingApiTest {
                 .contentType("application/json")
                 .body(json)
                 .when()
-                .post("http://localhost:7070/api/bookings")
+                .post("/api/bookings")
                 .then()
                 .statusCode(401);
     }
@@ -76,7 +87,7 @@ public class BookingApiTest {
                 .header("Authorization", "Bearer ugyldigt.token.her")
                 .body(json)
                 .when()
-                .post("http://localhost:7070/api/bookings")
+                .post("/api/bookings")
                 .then()
                 .statusCode(401);
     }
@@ -84,10 +95,10 @@ public class BookingApiTest {
     @Test
     void createBookingWithValidJWTTest() {
 
-        // Login som kørelærer
+        // Log in as an instructor
         String instructorToken = instructorToken();
 
-        // Opret en elev med unik e-mail
+        // Create a student with a unique email
         String email = "booking-" + UUID.randomUUID() + "@student.dk";
 
         String studentJson = """
@@ -104,14 +115,14 @@ public class BookingApiTest {
                 .auth().oauth2(instructorToken)
                 .body(studentJson)
                 .when()
-                .post("http://localhost:7070/api/students")
+                .post("/api/students")
                 .then()
                 .log().ifValidationFails()
                 .statusCode(201)
                 .extract()
                 .path("id");
 
-        // Opret en kørelærer med unik e-mail
+        // Create an instructor with a unique email
         String instructorEmail =
                 "booking-instructor-" + UUID.randomUUID() + "@test.dk";
 
@@ -129,14 +140,14 @@ public class BookingApiTest {
                 .auth().oauth2(instructorToken)
                 .body(instructorJson)
                 .when()
-                .post("http://localhost:7070/api/instructors")
+                .post("/api/instructors")
                 .then()
                 .log().ifValidationFails()
                 .statusCode(201)
                 .extract()
                 .path("id");
 
-        // Opret en køretime
+        // Create a lesson
         String lessonJson = """
                 {
                     "lessonTime": "2026-11-25T14:00:00",
@@ -151,14 +162,14 @@ public class BookingApiTest {
                 .auth().oauth2(instructorToken)
                 .body(lessonJson)
                 .when()
-                .post("http://localhost:7070/api/lessons")
+                .post("/api/lessons")
                 .then()
                 .log().ifValidationFails()
                 .statusCode(201)
                 .extract()
                 .path("id");
 
-        // Login som den nye elev
+        // Log in as the new student
         String loginJson = """
                 {
                     "email": "%s",
@@ -170,14 +181,14 @@ public class BookingApiTest {
                 .contentType("application/json")
                 .body(loginJson)
                 .when()
-                .post("http://localhost:7070/api/students/login")
+                .post("/api/students/login")
                 .then()
                 .log().ifValidationFails()
                 .statusCode(200)
                 .extract()
                 .path("token");
 
-        // Opret booking med gyldig JWT-token
+        // Create a booking with a valid JWT token
         String bookingJson = """
                 {
                     "bookingTime": "2026-11-25T14:00:00",
@@ -191,7 +202,7 @@ public class BookingApiTest {
                 .auth().oauth2(token)
                 .body(bookingJson)
                 .when()
-                .post("http://localhost:7070/api/bookings")
+                .post("/api/bookings")
                 .then()
                 .log().ifValidationFails()
                 .statusCode(201);

@@ -9,7 +9,15 @@ import java.util.List;
 
 public class LessonDAOImpl implements LessonDAO {
 
-    private EntityManagerFactory emf = HibernateConfig.getEntityManagerFactory();
+    private final EntityManagerFactory emf;
+
+    public LessonDAOImpl() {
+        this(HibernateConfig.getEntityManagerFactory());
+    }
+
+    public LessonDAOImpl(EntityManagerFactory emf) {
+        this.emf = emf;
+    }
 
     @Override
     public Lesson create(Lesson lesson) {

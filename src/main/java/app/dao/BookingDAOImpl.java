@@ -9,7 +9,15 @@ import java.util.List;
 
 public class BookingDAOImpl implements BookingDAO {
 
-    private EntityManagerFactory emf = HibernateConfig.getEntityManagerFactory();
+    private final EntityManagerFactory emf;
+
+    public BookingDAOImpl() {
+        this(HibernateConfig.getEntityManagerFactory());
+    }
+
+    public BookingDAOImpl(EntityManagerFactory emf) {
+        this.emf = emf;
+    }
 
     @Override
     public Booking create(Booking booking) {

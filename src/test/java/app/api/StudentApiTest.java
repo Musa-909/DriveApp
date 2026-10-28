@@ -1,7 +1,9 @@
 
 package app.api;
 
-import io.restassured.RestAssured;
+import app.testutils.ApiTest;
+import app.dao.InstructorDAOImpl;
+import app.entities.Instructor;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -14,20 +16,22 @@ import app.entities.Student;
 import static org.junit.jupiter.api.Assertions.*;
 import java.util.UUID;
 
-class StudentApiTest {
+class StudentApiTest extends ApiTest {
+
+    private String testInstructorEmail;
+    private static final String TEST_PASSWORD = "Test1234";
 
     @BeforeAll
-    static void setup() {
-        RestAssured.baseURI = "http://localhost";
-        RestAssured.port = 7070;
+    void createInstructorForTests() {
+        testInstructorEmail = "instructor-admin-" + UUID.randomUUID() + "@test.dk";
+        Instructor instructor = new Instructor("Test Admin", testInstructorEmail, "22222222");
+        instructor.setPassword(BCrypt.hashpw(TEST_PASSWORD, BCrypt.gensalt()));
+        new InstructorDAOImpl(emf).create(instructor);
     }
 
     private String instructorToken() {
-        String email = System.getenv().getOrDefault("TEST_INSTRUCTOR_EMAIL", "musa@gmail.com");
-        String password = System.getenv("TEST_INSTRUCTOR_PASSWORD");
-        if (password == null) {
-            throw new IllegalStateException("Set TEST_INSTRUCTOR_PASSWORD before running API tests");
-        }
+        String email = testInstructorEmail;
+        String password = TEST_PASSWORD;
         return given().contentType("application/json")
                 .body("{\"email\":\"" + email + "\",\"password\":\"" + password + "\"}")
                 .post("/api/instructors/login")
@@ -99,13 +103,15 @@ class StudentApiTest {
     void updateStudentTest() {
         int id = createTestStudent();
 
+        String email = "updated-" + UUID.randomUUID() + "@student.dk";
         String json = """
                 {
                     "name": "Updated Student",
-                    "email": "updated@student.dk",
-                    "phoneNumber": "87654321"
+                    "email": "%s",
+                    "phoneNumber": "87654321",
+                    "password": "Test1234"
                 }
-                """;
+                """.formatted(email);
 
         given()
                 .header("Authorization", "Bearer " + instructorToken())
@@ -117,7 +123,7 @@ class StudentApiTest {
                 .then()
                 .statusCode(200)
                 .body("name", equalTo("Updated Student"))
-                .body("email", equalTo("updated@student.dk"));
+                .body("email", equalTo(email));
     }
 
     @Test
@@ -201,14 +207,15 @@ class StudentApiTest {
     void updateInstructorTest() {
         int id = createTestInstructor();
 
+        String email = "updated-" + UUID.randomUUID() + "@instructor.dk";
         String json = """
                 {
                   "name": "Updated Instructor",
-                  "email": "updated@instructor.dk",
+                  "email": "%s",
                   "phoneNumber": "88888888",
                   "password": "Test1234"
                 }
-                """;
+                """.formatted(email);
 
         given()
                 .header("Authorization", "Bearer " + instructorToken())
@@ -220,7 +227,7 @@ class StudentApiTest {
                 .then()
                 .statusCode(200)
                 .body("name", equalTo("Updated Instructor"))
-                .body("email", equalTo("updated@instructor.dk"));
+                .body("email", equalTo(email));
     }
 
     @Test
@@ -231,10 +238,9 @@ class StudentApiTest {
                 .header("Authorization", "Bearer " + instructorToken())
                 .pathParam("id", id)
                 .when()
-                .get("/api/instructors/{id}")
+                .delete("/api/instructors/{id}")
                 .then()
-                .statusCode(200)
-                .body("id", equalTo(id));
+                .statusCode(204);
     }
 
 
@@ -367,7 +373,6 @@ class StudentApiTest {
                 .when()
                 .post("/api/bookings")
                 .then()
-                .log().all()
                 .statusCode(201)
                 .body("studentId", equalTo(studentId))
                 .body("lessonId", equalTo(lessonId));
@@ -409,7 +414,6 @@ class StudentApiTest {
                 .when()
                 .put("/api/bookings/{id}")
                 .then()
-                .log().all()
                 .statusCode(200)
                 .body("studentId", equalTo(studentId))
                 .body("lessonId", equalTo(lessonId));
@@ -430,7 +434,7 @@ class StudentApiTest {
 
 
     @Test
-    void createStudentWithHashePasswordTest() {
+    void createStudentWithHashedPasswordTest() {
 
         String json = """
             {
@@ -452,7 +456,7 @@ class StudentApiTest {
                 .extract()
                 .path("id");
 
-        StudentDAOImpl studentDAO = new StudentDAOImpl();
+        StudentDAOImpl studentDAO = new StudentDAOImpl(emf);
         Student student = studentDAO.getById(studentId);
 
         assertNotNull(student);
@@ -464,37 +468,16 @@ class StudentApiTest {
 
 
     @Test
-    void loginStudentTest() {
-        String email = "bcrypt-" + UUID.randomUUID() + "@student.dk";
+    void loginWithWrongPasswordTest() {
+        String email = "student-" + UUID.randomUUID() + "@test.dk";
         createTestStudent(email);
 
         String json = """
                 {
                     "email": "%s",
-                    "password": "Test1234"
+                    "password": "ForkertPassword123"
                 }
                 """.formatted(email);
-
-        given()
-                .contentType("application/json")
-                .body(json)
-                .when()
-                .post("/api/students/login")
-                .then()
-                .statusCode(200)
-                .body("message", equalTo("Login successful"))
-                .body("token", notNullValue());
-    }
-
-    @Test
-    void loginWithWrongPasswordTest() {
-
-        String json = """
-            {
-                "email": "notfound-%s@student.dk",
-                "password": "ForkertPassword123"
-            }
-            """.formatted(UUID.randomUUID());
 
         given()
                 .contentType("application/json")
@@ -630,7 +613,7 @@ class StudentApiTest {
     }
 
     private String loginTestStudent(int studentId) {
-        String email = new StudentDAOImpl().getById(studentId).getEmail();
+        String email = new StudentDAOImpl(emf).getById(studentId).getEmail();
 
         String json = """
                 {

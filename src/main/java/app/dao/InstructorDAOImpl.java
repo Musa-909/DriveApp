@@ -9,7 +9,15 @@ import java.util.List;
 
 public class InstructorDAOImpl implements InstructorDAO {
 
-    private EntityManagerFactory emf = HibernateConfig.getEntityManagerFactory();
+    private final EntityManagerFactory emf;
+
+    public InstructorDAOImpl() {
+        this(HibernateConfig.getEntityManagerFactory());
+    }
+
+    public InstructorDAOImpl(EntityManagerFactory emf) {
+        this.emf = emf;
+    }
 
     @Override
     public Instructor create(Instructor instructor) {

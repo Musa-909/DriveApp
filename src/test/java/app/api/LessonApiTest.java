@@ -1,74 +1,86 @@
 package app.api;
 
+import app.dao.InstructorDAOImpl;
+import app.entities.Instructor;
+import app.testutils.ApiTest;
+import org.mindrot.jbcrypt.BCrypt;
+import java.util.UUID;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.equalTo;
 
-public class LessonApiTest {
+public class LessonApiTest extends ApiTest {
 
-    // Login og hent JWT-token
-    private String instructorToken() {
-        String email = System.getenv().getOrDefault(
-                "TEST_INSTRUCTOR_EMAIL", "musa@gmail.com"
+    private String testInstructorEmail;
+    private static final String TEST_PASSWORD = "Test1234";
+
+    @BeforeAll
+    void createInstructorForTests() {
+        testInstructorEmail = "lesson-admin-" + UUID.randomUUID() + "@test.dk";
+
+        Instructor instructor = new Instructor(
+                "Test Admin",
+                testInstructorEmail,
+                "22222222"
         );
+        instructor.setPassword(BCrypt.hashpw(TEST_PASSWORD, BCrypt.gensalt()));
+        new InstructorDAOImpl(emf).create(instructor);
+    }
 
-        String password = System.getenv("TEST_INSTRUCTOR_PASSWORD");
-
-        if (password == null || password.isBlank()) {
-            throw new IllegalStateException(
-                    "Set TEST_INSTRUCTOR_PASSWORD before running API tests"
-            );
-        }
-
+    // Log in as an existing instructor and retrieve a JWT token
+    private String instructorToken() {
         String loginJson = """
                 {
                     "email": "%s",
                     "password": "%s"
                 }
-                """.formatted(email, password);
+                """.formatted(testInstructorEmail, TEST_PASSWORD);
 
         return given()
                 .contentType("application/json")
                 .body(loginJson)
                 .when()
-                .post("http://localhost:7070/api/instructors/login")
+                .post("/api/instructors/login")
                 .then()
                 .statusCode(200)
                 .extract()
                 .path("token");
     }
 
-    // Opret køretime med gyldig JWT
+    // Create a lesson with a valid JWT
     @Test
     void createNewLessonTest() {
 
-        // Login og hent token
+        // Log in and retrieve the token
         String token = instructorToken();
 
-        // Ny kørelærer til testen
+        // Create a new instructor for the test
+        String email = "lesson-test-" + UUID.randomUUID() + "@instructor.dk";
+
         String instructorJson = """
                 {
                     "name": "Test Instructor",
-                    "email": "lesson-test@instructor.dk",
+                    "email": "%s",
                     "phoneNumber": "12345678",
                     "password": "Test1234!"
                 }
-                """;
+                """.formatted(email);
 
         int instructorId = given()
                 .contentType("application/json")
                 .auth().oauth2(token)
                 .body(instructorJson)
                 .when()
-                .post("http://localhost:7070/api/instructors")
+                .post("/api/instructors")
                 .then()
-                .log().all()
+                .log().ifValidationFails()
                 .statusCode(201)
                 .extract()
                 .path("id");
 
-        // Ny køretime til testen
+        // Create a new lesson for the test
         String lessonJson = """
                 {
                     "lessonTime": "2026-10-25T14:00:00",
@@ -83,16 +95,16 @@ public class LessonApiTest {
                 .auth().oauth2(token)
                 .body(lessonJson)
                 .when()
-                .post("http://localhost:7070/api/lessons")
+                .post("/api/lessons")
                 .then()
-                .log().all()
+                .log().ifValidationFails()
                 .statusCode(201)
                 .body("durationMinutes", equalTo(60))
                 .body("lessonType", equalTo("PRACTICAL"))
                 .body("instructorId", equalTo(instructorId));
     }
 
-    // Opret køretime uden JWT
+    // Create a lesson without a JWT
     @Test
     void createLessonWithoutJWTTest() {
 
@@ -109,12 +121,12 @@ public class LessonApiTest {
                 .contentType("application/json")
                 .body(lessonJson)
                 .when()
-                .post("http://localhost:7070/api/lessons")
+                .post("/api/lessons")
                 .then()
                 .statusCode(401);
     }
 
-    // Opret køretime med ugyldig JWT
+    // Create a lesson with an invalid JWT
     @Test
     void createLessonWithInvalidJWTTest() {
 
@@ -132,7 +144,7 @@ public class LessonApiTest {
                 .header("Authorization", "Bearer invalid-token")
                 .body(lessonJson)
                 .when()
-                .post("http://localhost:7070/api/lessons")
+                .post("/api/lessons")
                 .then()
                 .statusCode(401);
     }
