@@ -1,12 +1,86 @@
 package app.api;
 
+import app.dao.InstructorDAOImpl;
+import app.entities.Instructor;
+import app.testutils.DatabaseTest;
+import io.javalin.Javalin;
+import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.mindrot.jbcrypt.BCrypt;
+
+import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.notNullValue;
 
-public class AiApiTest {
+public class AiApiTest extends DatabaseTest {
+
+    private Javalin app;
+
+    private String testInstructorEmail;
+    private String testStudentEmail;
+
+    private static final String TEST_PASSWORD = "Test1234";
+
+    @BeforeAll
+    void startApi() {
+
+        // This is a fake ai, so no real Gemini api calls
+        app = Application.createApp(emf, question -> CompletableFuture.completedFuture(
+                        "Test answer: ABS prevents wheels from locking.")
+        ).start(0);
+
+        RestAssured.baseURI = "http://localhost";
+        RestAssured.port = app.port();
+
+        // Create test instructor
+        testInstructorEmail =
+                "ai-instructor-" + UUID.randomUUID() + "@test.dk";
+
+        Instructor instructor = new Instructor(
+                "Test Instructor",
+                testInstructorEmail,
+                "22222222"
+        );
+
+        instructor.setPassword(
+                BCrypt.hashpw(TEST_PASSWORD, BCrypt.gensalt())
+        );
+
+        new InstructorDAOImpl(emf).create(instructor);
+
+        // Create test student
+        testStudentEmail =
+                "ai-student-" + UUID.randomUUID() + "@test.dk";
+
+        String studentJson = """
+                {
+                    "name": "Test Student",
+                    "email": "%s",
+                    "phoneNumber": "12345678",
+                    "password": "%s"
+                }
+                """.formatted(testStudentEmail, TEST_PASSWORD);
+
+        given()
+                .contentType(ContentType.JSON)
+                .body(studentJson)
+                .when()
+                .post("/api/students")
+                .then()
+                .statusCode(201);
+    }
+
+    @AfterAll
+    void stopApi() {
+        if (app != null) {
+            app.stop();
+        }
+    }
 
     private String login(String email, String password, String endpoint) {
         String loginJson = """
@@ -20,7 +94,7 @@ public class AiApiTest {
                 .contentType(ContentType.JSON)
                 .body(loginJson)
                 .when()
-                .post("http://localhost:7070" + endpoint)
+                .post(endpoint)
                 .then()
                 .statusCode(200)
                 .extract()
@@ -28,35 +102,22 @@ public class AiApiTest {
     }
 
     private String instructorToken() {
-        String email = System.getenv().getOrDefault(
-                "TEST_INSTRUCTOR_EMAIL", "musa@gmail.com"
+        return login(
+                testInstructorEmail,
+                TEST_PASSWORD,
+                "/api/instructors/login"
         );
-
-        String password = System.getenv("TEST_INSTRUCTOR_PASSWORD");
-
-        if (password == null || password.isBlank()) {
-            throw new IllegalStateException(
-                    "Set TEST_INSTRUCTOR_PASSWORD before running the test"
-            );
-        }
-
-        return login(email, password, "/api/instructors/login");
     }
 
     private String studentToken() {
-        String email = System.getenv("TEST_STUDENT_EMAIL");
-        String password = System.getenv("TEST_STUDENT_PASSWORD");
-
-
-        if (email == null || email.isBlank()
-                || password == null || password.isBlank()) {
-            throw new IllegalStateException(
-                    "Set TEST_STUDENT_EMAIL and TEST_STUDENT_PASSWORD before running the test"
-            );
-        }
-
-        return login(email, password, "/api/students/login");
+        return login(
+                testStudentEmail,
+                TEST_PASSWORD,
+                "/api/students/login"
+        );
     }
+
+    // Security tests
 
     @Test
     void aiWithoutJWTTest() {
@@ -68,7 +129,7 @@ public class AiApiTest {
                         }
                         """)
                 .when()
-                .post("http://localhost:7070/api/ai/driving-advice")
+                .post("/api/ai/driving-advice")
                 .then()
                 .statusCode(401);
     }
@@ -84,10 +145,12 @@ public class AiApiTest {
                         }
                         """)
                 .when()
-                .post("http://localhost:7070/api/ai/driving-advice")
+                .post("/api/ai/driving-advice")
                 .then()
                 .statusCode(401);
     }
+
+    // AI access tests
 
     @Test
     void instructorCanUseAI() {
@@ -102,7 +165,7 @@ public class AiApiTest {
                         }
                         """)
                 .when()
-                .post("http://localhost:7070/api/ai/driving-advice")
+                .post("/api/ai/driving-advice")
                 .then()
                 .statusCode(200)
                 .body("answer", notNullValue());
@@ -121,7 +184,7 @@ public class AiApiTest {
                         }
                         """)
                 .when()
-                .post("http://localhost:7070/api/ai/driving-advice")
+                .post("/api/ai/driving-advice")
                 .then()
                 .statusCode(200)
                 .body("answer", notNullValue());

@@ -41,7 +41,7 @@ class DrivingAiServiceTest {
     }
 
     @Test
-    void askDrivingAssistantShouldRejectUnrelatedQuestion()
+    void askDrivingAssistantShouldRespondToUnrelatedQuestion()
             throws IOException {
 
         DrivingAiService aiService = new DrivingAiService();
