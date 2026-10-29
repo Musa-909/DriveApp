@@ -1,12 +1,12 @@
 ### Vision
 
-Our goal with DriveApp was to create a backend system for a driving school that makes it easier to manage students, instructors, driving lessons, and bookings.
+Our goal with DriveApp was to create a backend system for a driving school that makes it easier to manage students, instructors, lessons, and bookings.
 
-Students can create an account, log in, view available driving lessons, and book a lesson. Instructors can manage student information, create and update lessons, and keep track of bookings.
+Students can register, log in, view available lessons, and make bookings, while instructors can manage students, lessons, and bookings.
 
-We also wanted to include something extra in our project, so we added an AI driving assistant using Google Gemini. The assistant allows students to ask questions about driving theory, traffic rules, and road safety.
+We also integrated an AI driving assistant using Google Gemini to help students with questions about driving theory and traffic rules.
 
-We developed DriveApp as our third-semester backend project to use what we have learned about Java, REST APIs, databases, security, testing, and deployment. Our focus was to build a working backend where the different parts of the application work together.
+DriveApp was developed as our third-semester backend project to apply what we have learned about Java, REST APIs, databases, security, testing, and deployment.
 
 ---
 
@@ -17,7 +17,6 @@ We developed DriveApp as our third-semester backend project to use what we have 
 | **GitHub Repository** | Complete source code, documentation, and project development. | [DriveApp Repository](https://github.com/Musa-909/DriveApp) |
 | **Live Application** | Deployed REST API running on our production server. | [https://driveapp.website](https://driveapp.website) |
 | **API Health Check** | Endpoint used to verify that the backend is running. | [GET /api/health](https://driveapp.website/api/health) |
-| **Project Video** | Short walkthrough of the system, architecture, and main features. | Coming soon |
 
 ---
 
@@ -262,7 +261,7 @@ Before saving the booking, the API checks that the student and lesson exist and 
 
 If the lesson has already been booked, the API returns `400 Bad Request`.
 
-##### 4. Ask the AI Driving Assistant
+#### 4. Ask the AI Driving Assistant
 
 Students can ask the AI assistant questions about driving theory, traffic rules, and road safety.
 
@@ -332,64 +331,46 @@ The user stories helped us plan the project and decide which features to focus o
 
 ### Development Notes
 
-#### Run Locally
+#### Development and Database Setup
 
-To run DriveApp locally, we need Java 17, Maven, and a running PostgreSQL database.
+DriveApp uses Java 17, Maven, PostgreSQL, and Docker.
 
-##### Requirements
+Our project uses two main database environments:
 
-- JDK 17
-- Maven
-- PostgreSQL
-- IntelliJ IDEA (optional)
+1. **Production Database:** Our deployed application uses a PostgreSQL database configured through environment variables on our production server.
+2. **Automated Testing:** Our DAO and API tests use temporary PostgreSQL 16 databases created automatically through Testcontainers.
 
-##### Setup
+This setup allows us to test our application without manually creating or maintaining a local test database.
 
-**1. Clone the repository**
+#### Requirements
 
-```bash
-git clone https://github.com/Musa-909/DriveApp.git
-cd DriveApp
-```
+To run the automated tests, we need:
 
-**2. Configure the database**
+1. JDK 17
+2. Maven
+3. Docker Desktop or another compatible Docker environment
+4. IntelliJ IDEA
+5. 
 
-DriveApp uses separate database configurations for development, automated testing, and production:
+#### Running the Application Locally (Optional)
 
-- **Local development:** A local PostgreSQL database configured through `config.properties`.
-- **Automated DAO and API tests:** Temporary PostgreSQL 16 databases started automatically by Testcontainers in Docker.
-- **Production:** The deployed PostgreSQL database configured through environment variables.
+DriveApp can also be started locally using `Main.java` in IntelliJ IDEA or by runnning the application through Maven.
 
-Automated tests are isolated from the local and production databases.
-
-When running the application locally, PostgreSQL must be running and a database must be available.
-
-Create `src/main/resources/config.properties` with the following settings:
+This requires a running local PostgreSQL database configured through `src/main/resources/config.properties`:
 
 ```properties
-DB_NAME=driveapp_dev
+DB_NAME=driveapp_test
 DB_USERNAME=postgres
 DB_PASSWORD=your-local-password
 ```
 
-These are example values. The database name, username, and password must match the PostgreSQL setup on your computer. The local application does not connect to the temporary databases started by Testcontainers.
+The database must exist, and the credentials must match the local PostgreSQL setup.
 
-**3. Set environment variables**
+The application also requires `JWT_SECRET` for authentication and `GEMINI_API_KEY` when using the AI assistant.
 
-For local execution, we use:
+The `DEPLOYED` environment variable should not be set when running the application locally, as this would make the application use the deployed database configuration.
 
-- `JWT_SECRET` – Required for JWT authentication.
-- `GEMINI_API_KEY` – Required when using the AI driving assistant.
-
-The local database connection is configured through `config.properties`, so `DB_NAME`, `DB_USERNAME`, and `DB_PASSWORD` do not need to be set separately as environment variables.
-
-Do not set `DEPLOYED` when running locally, because that makes the application use the deployed database configuration instead.
-
-**4. Run the application**
-
-We can start DriveApp by running the `main()` method in `Main.java` through IntelliJ IDEA. This calls `Application.main()`, which starts our Javalin REST API.
-
-Alternatively, we can build and run the application through the terminal:
+We can build and start the application using:
 
 ```bash
 mvn clean package -DskipTests
@@ -400,13 +381,35 @@ The application runs on:
 
 `http://localhost:7070`
 
-We can check if the REST API is running by opening:
+We can check if the API is running through:
 
 `http://localhost:7070/api/health`
 
-##### Creating the First Instructor
+This setup is only needed if you want to run and test the application locally using `config.properties`. It is not required for automated tests, since Testcontainers handles the test databases automatically.
 
-Creating an instructor through `POST /api/instructors` requires an existing instructor account with a valid JWT token. Therefore, the first instructor must be added directly to the database with a BCrypt-hashed password. Once the account has been created, the instructor can log in through `POST /api/instructors/login` and create additional instructor accounts through the API.
+#### Production Environment
+
+Our application is deployed using Docker on a DigitalOcean server.
+
+The production database connection is configured through environment variables, including `DB_NAME`, `DB_USERNAME`, `DB_PASSWORD`, and `CONNECTION_STR`.
+
+JWT authentication and our Gemini integration use `JWT_SECRET` and `GEMINI_API_KEY`.
+
+The deployed REST API is available at:
+
+https://driveapp.website
+
+We can verify that the application is running through:
+
+https://driveapp.website/api/health
+
+#### Creating the First Instructor
+
+Creating an instructor through `POST /api/instructors` requires an existing instructor account with a valid JWT token.
+
+Therefore, the first instructor must be added directly to the database with a BCrypt-hashed password.
+
+Once the account has been created, the instructor can log in through `POST /api/instructors/login` and create additional instructor accounts through the API.
 
 ---
 
@@ -422,6 +425,18 @@ Our tests cover different parts of the application:
 - **AI Tests:** `AiApiTest` uses a fake AI response to test the endpoint without calling Gemini. `DrivingAiServiceTest` calls the real Gemini API.
 
 `HibernateTestConfig` configures the container database, `DatabaseTest` starts and stops PostgreSQL, and `ApiTest` starts and stops Javalin for the standard API test classes. `AiApiTest` starts Javalin separately to inject its fake AI service.
+
+#### Improvements to Our Testing Setup
+
+At the beginning of the project, our API tests depended on a manually started Javalin server running on localhost:7070 and an existing PostgreSQL database. We also used environment variables such as `TEST_INSTRUCTOR_EMAIL`, `TEST_INSTRUCTOR_PASSWORD`, `TEST_STUDENT_EMAIL`, and `TEST_STUDENT_PASSWORD` to log in with predefined test accounts.
+
+This setup required more manual configuration and made it harder to run the tests on different computers.
+
+Later, we improved our testing setup by integrating Testcontainers into our automated tests. Our DAO and API tests now use temporary PostgreSQL databases that are automatically started through Docker. We also created shared `DatabaseTest` and `ApiTest` classes to manage the database and start Javalin automatically on an available port.
+
+The tests now create their own test users, so we no longer need predefined accounts or their environment variables.
+
+These changes made our tests more independent, reliable, and easier to run. They also reduced the amount of manual setup and made it easier to run the complete test suite locally and through GitHub Actions.
 
 #### Automated Testing with GitHub Actions
 
